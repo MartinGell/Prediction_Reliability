@@ -24,21 +24,23 @@ grid = dict(kernel=kernel, tol=tolerance, C=C)
 wd = Path('/data/project/impulsivity/prediction_HCPA')
 out_dir = wd / 'res'
 
+# load behavioural measures
+path2beh = wd / 'text_files/beh_Nevena_subs.csv'
+tab = pd.read_csv(path2beh) # beh data
+#y = tab[N:N,N]
+#y_val = tab[N:N,N]
+
 # load data and define leave out set
 # table of subs (rows) by regions (columns)
 path2FC = wd / 'text_files/FC_Nevena_Power2013_VOIs-combiSubs-rsFC-meanROI_GSR-5mm.csv'
 FCs = pd.read_csv(path2FC)
 #FCs = FCs.iloc[0:339,:]
 #FCs = FCs.iloc[:,-1]
-FCs.pop('subs1')
 
-# load behavioural measures
-path2beh = wd / 'text_files/beh_Nevena_subs.csv'
-tab = pd.read_csv(path2beh) # beh data
-#y = tab[N:N,N]
-#y_val = tab[N:N,N]
+# Filter FC subs based on behaviour subs
+FCs = FCs[FCs.iloc[:,0].isin(tab.iloc[:,0])]
 tab = tab.loc[:, ["Strength_Unadj"]]
-
+FCs.pop('subs1')
 
 # remove hold out data
 X, X_val, y, y_val = train_test_split(FCs, tab, test_size=0.2, random_state=0)

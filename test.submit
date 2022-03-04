@@ -1,0 +1,23 @@
+# The environment
+universe = vanilla
+getenv = True
+
+# Resources
+request_cpus   = 1
+request_memory = 15G
+request_disk   = 15G
+
+# Execution
+initial_dir = /data/project/impulsivity/prediction_HCPA
+executable = $(initial_dir)/run_in_venv.sh
+transfer_executable = False
+
+arguments = csguide python preprocess_HCP_l_test.py
+
+# Job
+log 	= $(initial_dir)/logs/$(Cluster).$(Process).log
+output 	= $(initial_dir)/logs/$(Cluster).$(Process).out
+error 	= $(initial_dir)/logs/$(Cluster).$(Process).err
+
+Queue
+
