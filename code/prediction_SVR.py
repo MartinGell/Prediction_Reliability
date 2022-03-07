@@ -4,11 +4,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.svm import SVR
-from sklearn.model_selection import train_test_split
 #from sklearn.preprocessing import StandardScaler # for preprocessing
 import matplotlib.pyplot as plt
-from sklearn.model_selection import RepeatedKFold
-from sklearn.model_selection import cross_validate
+from sklearn.model_selection import RepeatedKFold, cross_validate, train_test_split
 from sklearn import metrics
 #from sklearn.pipeline import make_pipeline
 
