@@ -20,8 +20,8 @@ C = [0.001, 0.01, 0.1, 1, 10, 100]
 grid = dict(kernel=kernel, tol=tolerance, C=C)
 
 # paths
-#wd = Path('/home/mgell/Work/Prediction')
-wd = Path('/data/project/impulsivity/prediction_HCPA')
+wd = Path('/home/mgell/Work/Prediction_HCP')
+#wd = Path('/data/project/impulsivity/prediction_HCPA')
 out_dir = wd / 'res'
 
 # load behavioural measures
@@ -38,8 +38,8 @@ FCs = pd.read_csv(path2FC)
 #FCs = FCs.iloc[:,-1]
 
 # Filter FC subs based on behaviour subs
-FCs = FCs[FCs.iloc[:,0].isin(tab.iloc[:,0])]
-tab = tab.loc[:, ["Strength_Unadj"]]
+#FCs = FCs[FCs.iloc[:,0].isin(tab.iloc[:,0])]
+tab = tab.loc[:, ["Strength_Unadj"]] #Strength_Unadj nih_tlbx_agecsc_dominant
 FCs.pop('subs1')
 
 # remove hold out data
