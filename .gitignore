@@ -4,8 +4,7 @@
 
 
 # my files
-/logs
-/res
+/res/*
 /figures
 /code_figures
 

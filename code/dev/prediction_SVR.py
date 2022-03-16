@@ -1,6 +1,7 @@
 #%%
 # Imports
 from pathlib import Path
+import sys
 import numpy as np
 import pandas as pd
 from sklearn.svm import SVR
@@ -33,7 +34,9 @@ tab = pd.read_csv(path2beh) # beh data
 
 # load data and define leave out set
 # table of subs (rows) by regions (columns)
-path2FC = wd / 'text_files/FC_Nevena_Power2013_VOIs-combiSubs-rsFC-meanROI_GSR-5mm.csv'
+#FC_file = 'FC_Nevena_Power2013_VOIs-combiSubs-rsFC-meanROI_GSR-5mm.csv'
+FC_file = sys.argv[1]
+path2FC = wd / 'text_files' / FC_file
 FCs = pd.read_csv(path2FC)
 #FCs.iloc[:,12:40]
 #FCs['subs1'] = tab['Subject']
@@ -42,6 +45,8 @@ FCs = pd.read_csv(path2FC)
 FCs = FCs[FCs.iloc[:,0].isin(tab.iloc[:,0])]
 tab = tab.loc[:, ["Strength_Unadj"]]
 FCs.pop('subs1')
+
+print(f'Using: {FC_file}')
 
 # remove hold out data
 if val_split:
@@ -70,7 +75,10 @@ return_train_score=False, return_estimator=True, verbose=3, n_jobs=1) # currentl
 cv_res = pd.DataFrame(scores)
 
 # Save CV results
-out_file = out_dir / 'cv' / f"{designator}cv_res.csv"
+out_file = out_dir / 'cv'
+out_file.mkdir(parents=True, exist_ok=True)
+out_file = out_file / f"{''.join(FC_file.split('.')[0:-1])}_cv_res.csv"
+print(f'saving: {out_file}')
 cv_res.to_csv(out_file, index=False)
 
 # Save average CV results

@@ -1,0 +1,22 @@
+# The environment
+universe    = vanilla
+getenv      = True
+
+# Resources
+request_cpus   = 1
+request_memory = 15G
+request_disk   = 15G
+
+# Execution
+initialdir = /data/project/impulsivity/internship/Preprocess_HCP/code
+executable = $(initialdir)/run_in_venv.sh
+transfer_executable = False
+
+arguments = HCP_env python prediction_SVR.py $(net_i)
+
+# Job
+log         = $(initialdir)/logs/$(Cluster).$(Process).log
+output      = $(initialdir)/logs/$(Cluster).$(Process).out
+error       = $(initialdir)/logs/$(Cluster).$(Process).err
+
+queue net_i from opts/nets.txt
