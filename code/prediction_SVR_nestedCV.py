@@ -5,22 +5,18 @@ import sys
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from logging import exception
-from scipy import stats
 from sklearn import metrics
+from func.utils import filter_outliers, sort_files
 from sklearn.svm import SVR
-from sklearn.model_selection import cross_validate, train_test_split, RepeatedKFold, KFold, GridSearchCV, cross_val_score
+from sklearn.model_selection import cross_validate, train_test_split, RepeatedKFold, KFold, GridSearchCV
 #import matplotlib.pyplot as plt
 
 
 
 ### Set params ###
-#FC_file = 'FC_Nevena_Power2013_VOIs-combiSubs-rsFC-meanROI_GSR-5mm.csv'
 FC_file = 'zFC_seitzman_nodes_rfMRI_REST1_AP-subs_664-params_FC_gm_FSL025_no_overlap_dt_flt0.1_0.01.csv'
 #FC_file = sys.argv[1]
-#beh_file = 'text_files/beh_Nevena_subs.csv'
 beh_file = 'beh_HCP_A_motor.csv'
-#beh = "Strength_Unadj"
 beh = 'nih_tlbx_agecsc_dominant'
 
 model = SVR()
@@ -39,8 +35,8 @@ designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
 
-#%%
 
+#%%
 # paths
 #wd = Path('/home/mgell/Work/Prediction_HCP')
 wd = Path('/data/project/impulsivity/Prediction_HCP')
@@ -54,12 +50,8 @@ print(f'Using {beh}')
 print(f'Behaviour data shape: {tab.shape}')
 
 # remove outliers -> put into utils
-tab['z'] = stats.zscore(tab.loc[:,[beh]])
-tab = tab.loc[abs(tab['z']) < 3]
-outliers = tab.loc[abs(tab["z"]) > 3]
-if not outliers.empty:
-    print(f'Removed {len(outliers)} outliers')
-    print(f'{outliers}')
+tab = filter_outliers(tab,beh)
+print(f'Behaviour data shape: {tab.shape}') # just to check
 
 # load data and define leave out set
 # table of subs (rows) by regions (columns)
@@ -69,17 +61,8 @@ FCs = pd.read_csv(path2FC)
 print(f'Using {FC_file}')
 print(f'FC data shape: {FCs.shape}')
 
-# Filter FC subs based on behaviour subs -> put into utils
-print('Sorting and filtering')
-FCs = FCs.sort_values(by=FCs.keys()[0])
-tab = tab.sort_values(by=tab.keys()[0])
-
-FCs = FCs[FCs.iloc[:,0].isin(tab.iloc[:,0])]
-tab = tab[tab.iloc[:,0].isin(FCs.iloc[:,0])]
-
-if not all(FCs.iloc[:,0].to_numpy() == tab.iloc[:,0].to_numpy()):
-    raise Exception('ERROR: Subjects are not the same between FCs and behaviour')
-
+# Filter FC subs based on behaviour subs
+tab, FCs = sort_files(tab, FCs)
 tab = tab.loc[:, [beh]]
 FCs.pop(FCs.keys()[0])
 
