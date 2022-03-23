@@ -12,11 +12,11 @@ initialdir = /data/project/impulsivity/Prediction_HCP/code
 executable = $(initialdir)/run_in_venv.sh
 transfer_executable = False
 
-arguments = HCP_env python prediction_SVR_nestedCV.py seitzman_nodes_average_runs-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt0.1_0.01.csv rel/$(beh_i) interview_age
+arguments = HCP_env python prediction_SVR_nestedCV.py seitzman_nodes_average_runs-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt0.1_0.01.csv beh_HCP_A_motor.csv interview_age
 
 # Job
 log         = $(initialdir)/logs/$(Cluster).$(Process).log
 output      = $(initialdir)/logs/$(Cluster).$(Process).out
 error       = $(initialdir)/logs/$(Cluster).$(Process).err
 
-queue beh_i from opts/beh_90.txt
+Queue
