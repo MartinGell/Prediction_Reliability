@@ -4,22 +4,18 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+
 from pathlib import Path
 from sklearn import metrics
-from sklearn.compose import TransformedTargetRegressor
-from func.utils import filter_outliers, sort_files, transform2SD
-from sklearn.svm import SVR
-from sklearn.model_selection import cross_validate, train_test_split, RepeatedKFold, KFold, GridSearchCV
-from sklearn.linear_model import Lasso, Ridge
-from sklearn.preprocessing import QuantileTransformer
+
+from func.utils import filter_outliers, model_choice, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman
+from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV
 #import matplotlib.pyplot as plt
 
 
-
 ### Set params ###
-#pipe = 'ridge'
+#pipe = 'enet'
 pipe = sys.argv[4]
-scoring = ["neg_root_mean_squared_error", "neg_mean_absolute_error", "r2"] #need to create a new scorer for r
 
 #FC_file = 'seitzman_nodes_average_runs_REST1_REST1_REST2_REST2-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt0.1_0.01.csv'
 FC_file = sys.argv[1]
@@ -27,24 +23,6 @@ FC_file = sys.argv[1]
 beh_file = sys.argv[2]
 #beh = 'interview_age' #'nih_tlbx_agecsc_dominant' #'interview_age'  'nih_tlbx_agecsc_dominant'
 beh = sys.argv[3]
-
-if pipe == 'svr':
-    model = SVR()
-    #model = TransformedTargetRegressor(regressor=model, transformer=QuantileTransformer(n_quantiles=400, output_distribution="normal"))
-    kernel = ["linear"]
-    tolerance = [1e-3]
-    C = [0.01, 0.1, 1]
-    grid = dict(kernel=kernel, tol=tolerance, C=C)
-    #grid = {'regressor__kernel': kernel, 'regressor__tol': tolerance, 'regressor__C': C}
-elif pipe == 'lasso':
-    model = Lasso()
-    tolerance = [1e-3]
-    alphas = [1e-5, 1e-4, 1e-3, 1e-2, 0.1, 1, 2, 5] #1e-8
-    grid = dict(alpha=alphas, tol=tolerance)
-elif pipe == 'ridge':
-    model = Ridge()
-    alphas = [1e-8, 1e-5, 1e-4, 1e-3, 1e-2, 0.1, 1, 2, 5]
-    grid = dict(alpha=alphas)
 
 k_inner = 5             # k folds for hyperparam search
 k_outer = 10            # k folds for CV
@@ -55,9 +33,15 @@ designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
 
+score_pearson = metrics.make_scorer(cor_true_pred_pearson, greater_is_better=True)
+score_spearman = metrics.make_scorer(cor_true_pred_spearman, greater_is_better=True)
+
+scoring = {"RMSE": "neg_root_mean_squared_error", "MAE": "neg_mean_absolute_error", "R2": "r2", "r": score_pearson, "Rho": score_spearman}
+
 
 #%%
-# start message -> put in utils
+# start message
+nested, model, grid = model_choice(pipe)
 print(f'Running prediction with {model}')
 
 # paths
@@ -65,7 +49,7 @@ print(f'Running prediction with {model}')
 #wd = Path('/data/project/impulsivity/Prediction_HCP')
 wd = os.getcwd()
 wd = Path(os.path.dirname(wd))
-out_dir = wd / 'res'
+out_dir = wd / 'res' # / 'test_mean100'
 
 # load behavioural measures
 path2beh = wd / 'text_files' / beh_file
@@ -105,27 +89,45 @@ else:
 inner_cv = KFold(n_splits=k_inner, shuffle=True, random_state=rs)
 outer_cv = RepeatedKFold(n_splits=k_outer, n_repeats=n_outer, random_state=rs)
 
-# Nested CV with parameter optimization
-grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
-	cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None
-scores = cross_validate(grid_search, X, np.ravel(y), scoring=scoring, cv=outer_cv,
-    return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
+# Run CV 
+if nested == 1: # Nested CV with parameter optimization
+    print('Using nested CV..')
+    grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
+        cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None    
+    scores = cross_validate(grid_search, X, np.ravel(y), scoring=scoring, cv=outer_cv,
+        return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
+    # results
+    cv_res = pd.DataFrame(scores)
+    print(f'Best hyperparams from nested CV {n_outer}x{k_outer}x{k_inner}:')
+    for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)
+elif nested == 0: # non-nested CV
+    print('Using vanilla CV..')
+    scores = cross_validate(model, X, np.ravel(y), scoring=scoring, cv=outer_cv,
+        return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
+    # results
+    cv_res = pd.DataFrame(scores)
 
-
-cv_res = pd.DataFrame(scores)
-print(f'Best hyperparams from nested CV {n_outer}x{k_outer}x{k_inner}:')
-#print(cv_res.iloc[0,2].best_params_)
-for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)
-
-print(f'Overall accuracy: {cv_res.mean()}')
+mean_accuracy = cv_res.mean()
+print(f'Overall accuracy:')
+print(mean_accuracy)
+print(f'Overall fitting time: {int(np.round(cv_res.loc[:, ["fit_time"]].sum()/60).values)} mins')
 
 #%%
 # Save cv results
+beh_f = beh_file.split('.')[0]
+beh_f = beh_f.split('/')
+
 out_file = out_dir / 'cv'
 out_file.mkdir(parents=True, exist_ok=True)
-out_file = out_file / f"{pipe}-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh}-rseed_{rs}-cv_res.csv" # add beh to name!!!!
+out_file = out_file / f"{pipe}-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
 print(f'saving: {out_file}')
 cv_res.to_csv(out_file, index=False)
+
+out_file = out_dir / 'mean_accuracy'
+out_file.mkdir(parents=True, exist_ok=True)
+out_file = out_file / f"{pipe}_averaged-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
+print(f'saving averaged accuracy: {out_file}')
+mean_accuracy.to_frame().transpose().to_csv(out_file, index=False)
 
 print('FINISHED')
 
