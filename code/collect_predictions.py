@@ -10,6 +10,7 @@ import numpy as np
 # sample used
 #beh = 'grip'
 beh = sys.argv[1]
+n = sys.argv[2]
 opts = '_averaged-source_seitzman_nodes_average_runs_REST1_REST1_REST2_REST2-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt01_001-beh_'
 
 # paths 
@@ -42,11 +43,15 @@ elif beh == 'grip_ridge':
     res = pd.read_csv(f'{in_path}/{pipe}{opts}beh_HCP_A_motor_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
     reliabilities = [0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6]
-elif beh == 'grip_ridge':
-    beh_file = 'nih_tlbx_agecsc_dominant_450_1_wnoise'
+elif beh == 'grip_ridge_sample':
+    # change paths
+    in_path = Path('/data/project/impulsivity/Prediction_HCP/res/subsamples/mean_accuracy')
+    out_path = Path('/data/project/impulsivity/Prediction_HCP/res/subsamples/collected')
+    #
+    beh_file = f'nih_tlbx_agecsc_dominant_250_{n}_wnoise'
     pipe = 'ridge'
     # First load empirical results, then append all simulation res to it
-    res = pd.read_csv(f'{in_path}/{pipe}{opts}beh_HCP_A_motor_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
+    res = pd.read_csv(f'{in_path}/{pipe}{opts}nih_tlbx_agecsc_dominant_250_{n}_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
     reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6]
 elif beh == 'grip_true_ridge':
@@ -93,5 +98,13 @@ for rel_i in reliabilities:
         res = res.append(f, ignore_index=True)
 
 # Save
+out_path.mkdir(parents=True, exist_ok=True)
 out_file = out_path / f'{pipe}{opts}{beh_file}_all.csv'
 res.to_csv(out_file, index=False)
+
+
+# for rel_i in range(49):
+#     rel_i_str = str(rel_i)
+#     f_i = f"{in_path}/{f_designator}_{rel_i+2}_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv"
+#     f = pd.read_csv(f_i)
+#     res = res.append(f, ignore_index=True)
