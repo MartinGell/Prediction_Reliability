@@ -9,7 +9,7 @@ getenv      = True
 
 # Resources
 request_cpus   = 1
-request_memory = 3G
+request_memory = 2G
 request_disk   = 1G
 
 # Execution
@@ -20,8 +20,8 @@ transfer_executable = False
 arguments = HCP_env python prediction_SVR_nestedCV.py $(dat) rel/subsamples/$(beh_f_i) $(beh) $(pipe)
 
 # Job
-log         = $(initialdir)/logs/simulations/subsamples/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).log
-output      = $(initialdir)/logs/simulations/subsamples/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).out
-error       = $(initialdir)/logs/simulations/subsamples/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).err
+log         = $(initialdir)/logs/simulations/subsamples/250_10/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).log
+output      = $(initialdir)/logs/simulations/subsamples/250_10/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).out
+error       = $(initialdir)/logs/simulations/subsamples/250_10/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).err
 
-queue beh_f_i from opts/grip_noise_450.txt
+queue beh_f_i from opts/grip_250.txt

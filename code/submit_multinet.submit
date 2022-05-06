@@ -1,22 +1,27 @@
+# Run specific variables
+dat = seitzman_nodes_average_runs_REST1_REST1_REST2_REST2-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt0.1_0.01.csv
+beh = nih_tlbx_agecsc_dominant
+pipe = ridge_learning_curve
+
 # The environment
 universe    = vanilla
 getenv      = True
 
 # Resources
 request_cpus   = 1
-request_memory = 12G
-request_disk   = 15G
+request_memory = 3G
+request_disk   = 1G
 
 # Execution
 initialdir = /data/project/impulsivity/Prediction_HCP/code
 executable = $(initialdir)/run_in_venv.sh
 transfer_executable = False
 
-arguments = HCP_env python prediction_SVR_nestedCV.py seitzman_nodes_average_runs-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt0.1_0.01.csv rel/$(beh_i) interview_age
+arguments = HCP_env python prediction_SVR_nestedCV.py $(dat) rel/$(beh_f_i) $(beh) $(pipe)
 
 # Job
-log         = $(initialdir)/logs/$(Cluster).$(Process).log
-output      = $(initialdir)/logs/$(Cluster).$(Process).out
-error       = $(initialdir)/logs/$(Cluster).$(Process).err
+log         = $(initialdir)/logs/simulations/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).log
+output      = $(initialdir)/logs/simulations/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).out
+error       = $(initialdir)/logs/simulations/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).err
 
-queue beh_i from opts/beh_90.txt
+queue beh_f_i from opts/grip_noise.txt
