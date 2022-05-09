@@ -121,8 +121,14 @@ elif nested == 0: # non-nested CV
 mean_accuracy = cv_res.mean()
 print(f'Overall accuracy:')
 print(mean_accuracy)
-print(f'Overall fitting time: {int(np.round(cv_res.loc[:, ["fit_time"]].sum()/60).values)} mins')
 
+try:
+    fiting_time = cv_res.loc[:, ["fit_time"]].mean()
+    print(f'Overall fitting time: {fiting_time.values:.1f} mins')
+except:
+    print('didnt work')
+else:
+    print(f'Overall fitting time: {int(np.round(cv_res.loc[:, ["fit_time"]].sum()/60).values)} mins')
 #%%
 # Save cv results
 beh_f = beh_file.split('.')[0]
