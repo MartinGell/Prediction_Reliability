@@ -76,6 +76,27 @@ def model_choice(pipe):
 
 
 
+def heuristic_C(data_df=None):
+    """
+    Function from Vera/Kaustubh
+
+    Calculate the heuristic C for linearSVR (Joachims 2002).
+
+    Returns
+    -------
+    C : float
+        Theoretically calculated hyperparameter C for a linear SVM.
+    """
+
+    if data_df is None:
+        raise Exception('No data was provided.')
+
+    C = 1/np.mean(np.sqrt((data_df**2).sum(axis=1)))
+    # Formular Kaustubh: C = 1/mean(sqrt(rowSums(data^2)))
+
+    return C
+    
+
 def filter_outliers(tab, beh):
     tab['z'] = stats.zscore(tab.loc[:,[beh]])
     outliers = tab.loc[abs(tab['z']) > 3]
