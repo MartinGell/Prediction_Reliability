@@ -4,15 +4,6 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from sklearn.linear_model import Lasso, Ridge, ElasticNet, RidgeCV
-from sklearn.kernel_ridge import KernelRidge
-from sklearn.pipeline import make_pipeline
-from sklearn.svm import SVR
-
-from sklearn.compose import TransformedTargetRegressor
-from sklearn.preprocessing import QuantileTransformer, StandardScaler
-
-
 
 __all__ = ['heuristic_C','filter_outliers','sort_files','transform2SD','cor_true_pred_pearson','cor_true_pred_pearson']
 

@@ -7,10 +7,10 @@ from scipy import stats
 from sklearn.linear_model import Lasso, Ridge, ElasticNet, RidgeCV
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.pipeline import make_pipeline
-from sklearn.svm import SVR
+from sklearn.svm import SVR, LinearSVR
 
 from sklearn.compose import TransformedTargetRegressor
-from sklearn.preprocessing import QuantileTransformer, StandardScaler
+from sklearn.preprocessing import QuantileTransformer, StandardScaler, FunctionTransformer
 
 from func.utils import heuristic_C
 
@@ -25,6 +25,26 @@ def model_choice(pipe):
         tolerance = [1e-3]
         C = [0.001, 0.01, 0.1, 1] # for age: [0.01, 0.1, 0.5, 1]
         grid = dict(kernel=kernel, tol=tolerance, C=C)
+    elif pipe == 'svr_L1':
+        nested = 1 # using nested cv
+        model = LinearSVR(loss='epsilon_insensitive')
+        C = [0.001, 0.01, 0.1, 1] # for age: [0.01, 0.1, 0.5, 1]
+        grid = dict(C=C)
+    elif pipe == 'svr_L2':
+        nested = 1 # using nested cv
+        model = LinearSVR(loss='squared_epsilon_insensitive')
+        C = [0.001, 0.01, 0.1, 1] # for age: [0.01, 0.1, 0.5, 1]
+        grid = dict(C=C)
+    elif pipe == 'svr_L1_scaled':
+        nested = 1 # using nested cv
+        model = make_pipeline(StandardScaler(),LinearSVR(loss='epsilon_insensitive'))
+        C = [0.001, 0.01, 0.1, 1] # for age: [0.01, 0.1, 0.5, 1]
+        grid = dict(regressor__C=C)
+    elif pipe == 'svr_L1_heuristic':
+        nested = 0 # using nested cv
+        transformer = FunctionTransformer(heuristic_C)
+        model = make_pipeline(transformer,LinearSVR(loss='epsilon_insensitive'))
+        grid = []
     elif pipe == 'svr_y_q':
         nested = 1 # using nested cv
         model = SVR()
