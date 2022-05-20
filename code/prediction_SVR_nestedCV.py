@@ -36,11 +36,9 @@ res_folder = 'subsamples'
 # array or empty array (np.empty(0)) of subsamples to simulate
 subsample = np.empty(0) #np.array([195,295,395]) these are only train + 55 test makes 250, 350 and 450
 #subsample = np.array([195,295,395])
-#k_sample = 100
-
-# Do some checks
-#if subsample.any() and 'k_sample' in vars():
-#    raise Exception('n samples not defined, please define this parameter first')
+if subsample.any():
+    k_sample = 100
+    print(f'Subsampling: {subsample}, each {k_sample} times')
 
 score_pearson = metrics.make_scorer(cor_true_pred_pearson, greater_is_better=True)
 score_spearman = metrics.make_scorer(cor_true_pred_spearman, greater_is_better=True)
