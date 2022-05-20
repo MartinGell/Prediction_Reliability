@@ -8,7 +8,8 @@ import pandas as pd
 from pathlib import Path
 from sklearn import metrics
 
-from func.utils import filter_outliers, model_choice, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman
+from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman
+from func.models import model_choice
 from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV
 #import matplotlib.pyplot as plt
 
