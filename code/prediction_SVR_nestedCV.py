@@ -4,6 +4,7 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+import datatable as dt
 
 from pathlib import Path
 from sklearn import metrics
@@ -32,7 +33,7 @@ designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
 
-res_folder = 'test'
+#res_folder = 'test'
 
 # array or empty array (np.empty(0)) of subsamples to simulate
 subsample = np.empty(0) #np.array([195,295,395]) these are only train + 55 test makes 250, 350 and 450
@@ -78,7 +79,9 @@ print(f'Behaviour data shape: {tab_all.shape}') # just to check
 path2FC = wd / 'input' / FC_file
 #path2FC = Path(os.path.dirname(wd))
 #path2FC = path2FC / 'Preprocess_HCP' / 'res' / FC_file
-FCs_all = pd.read_csv(path2FC)
+#FCs_all = pd.read_csv(path2FC)
+FCs_all = dt.fread(path2FC)
+FCs_all = FCs_all.to_pandas()
 print(f'Using {FC_file}')
 print(f'FC data shape: {FCs_all.shape}')
 
