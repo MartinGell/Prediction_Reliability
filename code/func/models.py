@@ -2,7 +2,6 @@
 # imports
 import numpy as np
 import pandas as pd
-from scipy import stats
 
 from sklearn.linear_model import Lasso, Ridge, ElasticNet, RidgeCV
 from sklearn.kernel_ridge import KernelRidge
@@ -10,7 +9,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.svm import SVR, LinearSVR
 
 from sklearn.compose import TransformedTargetRegressor
-from sklearn.preprocessing import QuantileTransformer, StandardScaler, FunctionTransformer
+from sklearn.preprocessing import QuantileTransformer, StandardScaler
 
 from func.utils import heuristic_C
 
@@ -42,9 +41,9 @@ def model_choice(pipe):
         grid = dict(regressor__C=C)
     elif pipe == 'svr_L1_heuristic':
         nested = 0 # using nested cv
-        transformer = FunctionTransformer(heuristic_C)
-        model = make_pipeline(transformer,LinearSVR(loss='epsilon_insensitive'))
-        grid = []
+        C = heuristic_C()
+        model = LinearSVR(loss='epsilon_insensitive')
+        grid = dict(C=C)
     elif pipe == 'svr_y_q':
         nested = 1 # using nested cv
         model = SVR()
@@ -62,7 +61,7 @@ def model_choice(pipe):
     elif pipe == 'ridge':
         nested = 1 # using nested cv
         model = Ridge()
-        alphas = [100, 500, 1e3] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 5, 10, 100, 1e3, 1e4]
+        alphas = [1e3, 1e4] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 5, 10, 100, 1e3, 1e4]
         grid = dict(alpha=alphas)
     elif pipe == 'ridge_simple':
         nested = 0 # NOT using nested cv
@@ -70,7 +69,7 @@ def model_choice(pipe):
         grid = []
     elif pipe == 'ridgeCV':
         nested = 0 # using nested cv
-        alphas = [100, 500, 1e3, 1e4] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 5, 10, 100, 1e3, 1e4]        
+        alphas = [100, 1e3, 1e4] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
         model = RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
         grid = []
     elif pipe == 'ridge_learning_curve':
