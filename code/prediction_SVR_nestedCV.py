@@ -8,7 +8,7 @@ import pandas as pd
 from pathlib import Path
 from sklearn import metrics
 
-from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman
+from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman, heuristic_C
 from func.models import model_choice
 from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV
 #import matplotlib.pyplot as plt
@@ -32,13 +32,14 @@ designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
 
-res_folder = 'subsamples'
+res_folder = 'test'
 
 # array or empty array (np.empty(0)) of subsamples to simulate
 subsample = np.empty(0) #np.array([195,295,395]) these are only train + 55 test makes 250, 350 and 450
 #subsample = np.array([195,295,395])
 if subsample.any():
     k_sample = 100
+    res_folder = 'subsamples'
     print(f'Subsampling: {subsample}, each {k_sample} times')
 
 score_pearson = metrics.make_scorer(cor_true_pred_pearson, greater_is_better=True)
@@ -58,34 +59,36 @@ print(f'Running prediction with {model}')
 wd = os.getcwd()
 wd = Path(os.path.dirname(wd))
 out_dir = wd / 'res' 
-if res_folder:
+if 'res_folder' in locals():
     out_dir = out_dir / res_folder
 
 # load behavioural measures
 path2beh = wd / 'text_files' / beh_file
-tab = pd.read_csv(path2beh) # beh data
-tab = tab.dropna(subset = [beh]) # drop nans if there are in beh of interest
+tab_all = pd.read_csv(path2beh) # beh data
+tab_all = tab_all.dropna(subset = [beh]) # drop nans if there are in beh of interest
 print(f'Using {beh}')
-print(f'Behaviour data shape: {tab.shape}')
+print(f'Behaviour data shape: {tab_all.shape}')
 
 # remove outliers
-tab = filter_outliers(tab,beh)
-print(f'Behaviour data shape: {tab.shape}') # just to check
+tab_all = filter_outliers(tab_all,beh)
+print(f'Behaviour data shape: {tab_all.shape}') # just to check
 
 # load data and define leave out set
 # table of subs (rows) by regions (columns)
-path2FC = Path(os.path.dirname(wd))
-path2FC = path2FC / 'Preprocess_HCP' / 'res' / FC_file
-FCs = pd.read_csv(path2FC)
+path2FC = wd / 'input' / FC_file
+#path2FC = Path(os.path.dirname(wd))
+#path2FC = path2FC / 'Preprocess_HCP' / 'res' / FC_file
+FCs_all = pd.read_csv(path2FC)
 print(f'Using {FC_file}')
-print(f'FC data shape: {FCs.shape}')
+print(f'FC data shape: {FCs_all.shape}')
 
 # Filter FC subs based on behaviour subs
-tab, FCs = sort_files(tab, FCs)
+tab, FCs = sort_files(tab_all, FCs_all)
 # transform scores to SD_scores -> not sure if this is the right place for it
 #tab, beh = transform2SD(tab, beh, 'outlier')
 tab = tab.loc[:, [beh]]
 FCs.pop(FCs.keys()[0])
+print(f'FC data shape: {FCs.shape}')
 
 #%%
 # remove hold out data
@@ -102,7 +105,7 @@ outer_cv = RepeatedKFold(n_splits=k_outer, n_repeats=n_outer, random_state=rs)
 # Run CV 
 if nested == 1: # Nested CV with parameter optimization
     print('Using nested CV..')
-    print('Hyperparam search over:')
+    print(f'Hyperparam search with {n_outer}x{k_outer}x{k_inner} over:')
     print(f'{grid}')
     grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
         cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None    
@@ -110,20 +113,28 @@ if nested == 1: # Nested CV with parameter optimization
         return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
     # results
     cv_res = pd.DataFrame(scores)
-    print(f'Best hyperparams from nested CV {n_outer}x{k_outer}x{k_inner}:')
-    for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)
+    for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)             # put to utils?
 elif nested == 0: # non-nested CV
     print('Using vanilla CV..')
+    print(f'CV with {n_outer}x{k_outer}:')
     scores = cross_validate(model, X, np.ravel(y), scoring=scoring, cv=outer_cv,
         return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
     # results
     cv_res = pd.DataFrame(scores)
-    if pipe == 'ridgeCV':
-        for i in scores['estimator']: print(i.alpha_)
+    if pipe == 'ridgeCV':                                                   # put to utils?
+        for i in scores['estimator']: print(i.alpha_)                       # put to utils?
+elif nested == 99:
+    print('Using a heuristic to determine hyperparams')
+    print(f'CV with {n_outer}x{k_outer}:')
+    #databased_C = heuristic_C(data_df=None)
 
 mean_accuracy = cv_res.mean()
 print(f'Overall accuracy:')
 print(mean_accuracy)
+
+sd_accuracy = cv_res.std()
+print(f'Overall accuracy:')
+print(sd_accuracy)
 
 try:
     fiting_time = cv_res.loc[:, ["fit_time"]].mean()
