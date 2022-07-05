@@ -9,7 +9,7 @@ import datatable as dt
 from pathlib import Path
 from sklearn import metrics
 
-from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman, heuristic_C
+from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman
 from func.models import model_choice
 from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV
 #import matplotlib.pyplot as plt
@@ -33,7 +33,7 @@ designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
 
-#res_folder = 'test'
+#res_folder = 'exact_distribution'
 
 # array or empty array (np.empty(0)) of subsamples to simulate
 subsample = np.empty(0) #np.array([195,295,395]) these are only train + 55 test makes 250, 350 and 450
@@ -55,8 +55,6 @@ nested, model, grid = model_choice(pipe)
 print(f'Running prediction with {model}')
 
 # paths
-#wd = Path('/home/mgell/Work/Prediction_HCP')
-#wd = Path('/data/project/impulsivity/Prediction_HCP')
 wd = os.getcwd()
 wd = Path(os.path.dirname(wd))
 out_dir = wd / 'res' 
@@ -91,7 +89,8 @@ tab, FCs = sort_files(tab_all, FCs_all)
 #tab, beh = transform2SD(tab, beh, 'outlier')
 tab = tab.loc[:, [beh]]
 FCs.pop(FCs.keys()[0])
-print(f'FC data shape: {FCs.shape}')
+print('FCs after removing subjects:')
+print(FCs.head())
 
 #%%
 # remove hold out data
@@ -125,7 +124,9 @@ elif nested == 0: # non-nested CV
     # results
     cv_res = pd.DataFrame(scores)
     if pipe == 'ridgeCV':                                                   # put to utils?
-        for i in scores['estimator']: print(i.alpha_)                       # put to utils?
+        for i in scores['estimator']: print(i.alpha_)
+    elif pipe == 'ridgeCV_zscore':                                          # put to utils?
+        for i in scores['estimator']: print(i[1].alpha_)                       # put to utils?
 elif nested == 99:
     print('Using a heuristic to determine hyperparams')
     print(f'CV with {n_outer}x{k_outer}:')
@@ -205,11 +206,17 @@ if subsample.any():
     # cv
     outer_cv = ShuffleSplit(n_splits=k_sample, test_size=0.1, random_state=rs)
     #outer_cv = RepeatedKFold(n_splits=k_outer, n_repeats=n_outer, random_state=rs)
-    grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
-        cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None
-    #search_res = grid_search.fit(X, np.ravel(y))
-    scores = learning_curve(grid_search, X, np.ravel(y), train_sizes=subsample, return_times=True, shuffle=True,
-        cv=outer_cv, scoring='r2', verbose=3, n_jobs=1, random_state=rs)
+    if nested == 1:
+        print('Using nested CV..')
+        grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
+            cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None
+        scores = learning_curve(grid_search, X, np.ravel(y), train_sizes=subsample, return_times=True, shuffle=True,
+            cv=outer_cv, scoring='r2', verbose=3, n_jobs=1, random_state=rs)
+    elif nested == 0:
+        print('Using vanilla CV..')
+        scores = learning_curve(model, X, np.ravel(y), train_sizes=subsample, return_times=True, shuffle=True,
+            cv=outer_cv, scoring='r2', verbose=3, n_jobs=1, random_state=rs)
+
     # results
     train_size, train_scores, test_scores = scores[:3]
     #train_errors, test_errors = np.transpose(-train_scores), np.transpose(-test_scores)
