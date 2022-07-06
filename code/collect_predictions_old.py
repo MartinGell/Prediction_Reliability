@@ -22,22 +22,21 @@ out_path = Path('/data/project/impulsivity/prediction_simulations/res/collected'
 
 # which beh was simulated? excluding rel values.
 # e.g.: 'interview_age_wnoise'
-if beh == 'age_ridgeCV':
+if beh == 'age':
     beh_file = 'interview_age_wnoise'
-    pipe = 'ridgeCV'
+    pipe = 'ridge_simple'
     # First load empirical results, then append all simulation res to it
-    # ridgeCV_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695-beh_interview_age_interview_age-rseed_123456-cv_res.csv
-    res = pd.read_csv(f'{in_path}/{pipe}{opts}interview_age_interview_age-rseed_123456-cv_res.csv')
+    res = pd.read_csv(f'{in_path}/{pipe}{opts}beh_HCP_A_age_interview_age-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
     reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
-elif beh == 'age_ridgeCV_z':
+elif beh == 'age_true':
+    #ridge_simple_averaged-source_seitzman_nodes_average_runs_REST1_REST1_REST2_REST2-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt01_001-beh_interview_age_wnoise_rel_099_11_interview_age-rseed_123456-cv_res.csv
     beh_file = 'interview_age_wnoise'
-    pipe = 'ridgeCV_zscore'
+    pipe = 'ridge_simple'
     # First load empirical results, then append all simulation res to it
-    # ridgeCV_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695-beh_interview_age_interview_age-rseed_123456-cv_res.csv
-    res = pd.read_csv(f'{in_path}/ridgeCV{opts}interview_age_interview_age-rseed_123456-cv_res.csv')
+    res = pd.read_csv(f'{in_path}/{pipe}{opts}beh_HCP_A_age_interview_age-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
-    reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
+    reliabilities = [0.99]
 elif beh == 'grip_ridge':
     beh_file = 'nih_tlbx_agecsc_dominant_wnoise'
     pipe = 'ridge'
@@ -45,6 +44,13 @@ elif beh == 'grip_ridge':
     res = pd.read_csv(f'{in_path}/{pipe}{opts}beh_HCP_A_motor_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
     reliabilities = [0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6]
+elif beh == 'grip_ridgeCV':
+    beh_file = 'nih_tlbx_agecsc_dominant_wnoise'
+    pipe = 'ridgeCV'
+    # First load empirical results, then append all simulation res to it
+    res = pd.read_csv(f'{in_path}/{pipe}{opts}nih_tlbx_agecsc_dominant_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
+    res['reliability'] = 1.0
+    reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6]
 elif beh == 'grip_ridge':
     beh_file = 'nih_tlbx_agecsc_dominant_wnoise'
     pipe = 'ridge'
@@ -52,13 +58,24 @@ elif beh == 'grip_ridge':
     res = pd.read_csv(f'{in_path}/{pipe}{opts}nih_tlbx_agecsc_dominant_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
     reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6]
-elif beh == 'grip_ridgeCV_z':
-    beh_file = 'HCP_A_motor_wnoise' #ridgeCV_zscore_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695-beh_HCP_A_motor_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv
-    pipe = 'ridgeCV_zscore'
+elif beh == 'grip_ridge_sample':
+    # change paths
+    in_path = Path('/data/project/impulsivity/Prediction_HCP/res/subsamples/mean_accuracy')
+    out_path = Path('/data/project/impulsivity/Prediction_HCP/res/subsamples/collected')
+    #
+    beh_file = f'nih_tlbx_agecsc_dominant_250_{n}_wnoise'
+    pipe = 'ridge'
     # First load empirical results, then append all simulation res to it
-    res = pd.read_csv(f'{in_path}/{pipe}{opts}HCP_A_motor_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
+    res = pd.read_csv(f'{in_path}/{pipe}{opts}nih_tlbx_agecsc_dominant_250_{n}_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
-    reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
+    reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6]
+elif beh == 'grip_true_ridge':
+    beh_file = 'nih_tlbx_agecsc_dominant_true_score_wnoise'
+    pipe = 'ridge'
+    # First load empirical results, then append all simulation res to it
+    res = pd.read_csv(f'{in_path}/{pipe}{opts}beh_HCP_A_motor_nih_tlbx_agecsc_dominant-rseed_123456-cv_res.csv')
+    res['reliability'] = 1.0
+    reliabilities = [0.99]#[0.92,0.94,0.96]
 elif beh == 'lswm_ridge':
     beh_file = 'age_corrected_standard_score_true_score_wnoise'
     pipe = 'ridge'
@@ -75,26 +92,20 @@ elif beh == 'crycog_ridge':
     res['reliability'] = 1.0
     reliabilities = [0.85, 0.65]
 elif beh == 'crycog_ridgeCV':
-    beh_file = 'HCP_A_cryst_wnoise' #-beh_beh_HCP_A_cryst_wnoise_rel_095_80_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv
+    beh_file = 'beh_HCP_A_cryst_wnoise' #-beh_beh_HCP_A_cryst_wnoise_rel_095_80_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv
     pipe = 'ridgeCV'
     # First load empirical results, then append all simulation res to it
-    res = pd.read_csv(f'{in_path}/{pipe}{opts}HCP_A_cryst_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv')
+    res = pd.read_csv(f'{in_path}/{pipe}{opts}beh_HCP_A_cryst_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
     reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
-elif beh == 'crycog_ridgeCV_z':
-    beh_file = 'HCP_A_cryst_wnoise' #-beh_beh_HCP_A_cryst_wnoise_rel_095_80_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv
-    pipe = 'ridgeCV_zscore'
+elif beh == 'crycog_true_ridge':
+    #ridge_averaged-source_seitzman_nodes_average_runs_REST1_REST1_REST2_REST2-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt01_001-beh_nih_crycogcomp_ageadjusted_true_score_wnoise_rel_095_17_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv
+    beh_file = 'nih_crycogcomp_ageadjusted_true_score_wnoise'
+    pipe = 'ridge'
     # First load empirical results, then append all simulation res to it
-    res = pd.read_csv(f'{in_path}/{pipe}{opts}HCP_A_cryst_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv')
+    res = pd.read_csv(f'{in_path}/{pipe}{opts}beh_HCP_A_cryst_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
-    reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
-elif beh == 'crycog_ridgeCV_exact_distribution':
-    beh_file = 'HCP_A_cryst_wnoise'
-    pipe = 'ridgeCV'
-    # First load empirical results, then append all simulation res to it
-    res = pd.read_csv(f'{in_path}/{pipe}{opts}HCP_A_cryst_nih_crycogcomp_ageadjusted-rseed_123456-cv_res.csv')
-    res['reliability'] = 1.0
-    reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
+    reliabilities = [0.99]
 
 # which files
 f_designator = pipe+opts+beh_file
@@ -102,7 +113,6 @@ print(f'Looking for: {f_designator}_rel_*')
 
 for rel_i in reliabilities:
     rel_i_str = str(rel_i)
-    print(rel_i_str)
     files = glob(f"{in_path}/{f_designator}_rel_{rel_i_str.replace('.','')}_*")
 
     for f_i in files:
