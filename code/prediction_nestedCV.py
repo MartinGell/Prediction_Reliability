@@ -8,6 +8,7 @@ import datatable as dt
 
 from pathlib import Path
 from sklearn import metrics
+from scipy.stats import zscore
 
 from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman
 from func.models import model_choice
@@ -29,6 +30,7 @@ k_outer = 10            # k folds for CV
 n_outer = 5             # n repeats for CV
 rs = 123456             # random state: int for reproducibility or None
 
+ztrans = True           # zscore data
 designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
@@ -92,6 +94,11 @@ FCs.pop(FCs.keys()[0])
 print('FCs after removing subjects:')
 print(FCs.head())
 
+# optionaly zscore FCs
+if ztrans:
+    FCs = FCs.apply(lambda V: zscore(V), axis=1, result_type='broadcast')
+    print('FCs zscored')
+
 #%%
 # remove hold out data
 if val_split:
@@ -133,11 +140,11 @@ elif nested == 99:
     #databased_C = heuristic_C(data_df=None)
 
 mean_accuracy = cv_res.mean()
-print(f'Overall accuracy:')
+print(f'Overall MEAN accuracy:')
 print(mean_accuracy)
 
 sd_accuracy = cv_res.std()
-print(f'Overall accuracy:')
+print(f'Overall SD accuracy:')
 print(sd_accuracy)
 
 #%%
