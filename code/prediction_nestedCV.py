@@ -30,7 +30,7 @@ k_outer = 10            # k folds for CV
 n_outer = 5             # n repeats for CV
 rs = 123456             # random state: int for reproducibility or None
 
-ztrans = True           # zscore data
+zscr = True            # zscore data
 designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
@@ -95,7 +95,7 @@ print('FCs after removing subjects:')
 print(FCs.head())
 
 # optionaly zscore FCs
-if ztrans:
+if zscr:
     FCs = FCs.apply(lambda V: zscore(V), axis=1, result_type='broadcast')
     print('FCs zscored')
 
@@ -152,15 +152,19 @@ print(sd_accuracy)
 beh_f = beh_file.split('.')[0]
 beh_f = beh_f.split('/')
 
+src_fc = ''.join(FC_file.split('.')[0:-1])
+if zscr:
+    src_fc = f'{src_fc}_zscored'
+
 out_file = out_dir / 'cv'
 out_file.mkdir(parents=True, exist_ok=True)
-out_file = out_file / f"{pipe}-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
+out_file = out_file / f"pipe_{pipe}-source_{src_fc}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
 print(f'saving: {out_file}')
 cv_res.to_csv(out_file, index=False)
 
 out_file = out_dir / 'mean_accuracy'
 out_file.mkdir(parents=True, exist_ok=True)
-out_file = out_file / f"{pipe}_averaged-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
+out_file = out_file / f"pipe_{pipe}_averaged-source_{src_fc}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
 print(f'saving averaged accuracy: {out_file}')
 mean_accuracy.to_frame().transpose().to_csv(out_file, index=False)
 
@@ -232,13 +236,13 @@ if subsample.any():
     # save train
     out_file = out_dir / 'learning_curve'
     out_file.mkdir(parents=True, exist_ok=True)
-    out_file = out_file / f"train_{pipe}-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
+    out_file = out_file / f"train-pipe_{pipe}-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
     print(f'saving: {out_file}')
     sample_train_res.to_csv(out_file, index=False)
 
     # save test
     out_file = out_dir / 'learning_curve'
-    out_file = out_file / f"test_{pipe}-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
+    out_file = out_file / f"test-pipe_{pipe}-source_{''.join(FC_file.split('.')[0:-1])}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
     print(f'saving: {out_file}')
     sample_test_res.to_csv(out_file, index=False)
 
