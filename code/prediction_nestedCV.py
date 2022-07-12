@@ -30,7 +30,7 @@ k_outer = 10            # k folds for CV
 n_outer = 5             # n repeats for CV
 rs = 123456             # random state: int for reproducibility or None
 
-zscr = True            # zscore data
+zscr = True             # zscore data
 designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
@@ -38,12 +38,14 @@ val_split_size = 0.2    # Size of validation held out sample
 #res_folder = 'exact_distribution'
 
 # array or empty array (np.empty(0)) of subsamples to simulate
-subsample = np.empty(0) #np.array([195,295,395]) these are only train + 55 test makes 250, 350 and 450
-#subsample = np.array([195,295,395])
+subsample = np.empty(0)
+#subsample = np.array([195,295,395]) # these are only train + 55 test makes 250, 350 and 450
+#subsample = np.array([3500,2500,1500,500]) # these are only train + 500 test makes 4k, 3k, 2k and 1k
 if subsample.any():
-    k_sample = 100
+    n_sample = 100
+    k_sample = 0.1
     res_folder = 'subsamples'
-    print(f'Subsampling: {subsample}, each {k_sample} times')
+    print(f'Subsampling: {subsample}, each {n_sample} times with {k_sample*100}% left out')
 
 score_pearson = metrics.make_scorer(cor_true_pred_pearson, greater_is_better=True)
 score_spearman = metrics.make_scorer(cor_true_pred_spearman, greater_is_better=True)
@@ -208,8 +210,7 @@ if val_split:
 if subsample.any():
     print('Computing learning curve..')
     # cv
-    outer_cv = ShuffleSplit(n_splits=k_sample, test_size=0.1, random_state=rs)
-    #outer_cv = RepeatedKFold(n_splits=k_outer, n_repeats=n_outer, random_state=rs)
+    outer_cv = ShuffleSplit(n_splits=n_sample, test_size=k_sample, random_state=rs)
     if nested == 1:
         print('Using nested CV..')
         grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
