@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import stats
 
 
-__all__ = ['heuristic_C','filter_outliers','sort_files','transform2SD','cor_true_pred_pearson','cor_true_pred_pearson']
+__all__ = ['heuristic_C','filter_outliers','sort_files','transform2SD','cor_true_pred_pearson','cor_true_pred_pearson','test_cor_true_pred']
 
 
 def heuristic_C(data_df=None):
@@ -136,4 +136,11 @@ def cor_true_pred_spearman(y_true, y_pred):
     # >>> cor_true_pred_spearman(x,y)
     # 0.7714285714285715
     cor, p = stats.spearmanr(y_true, y_pred)
+    return cor
+
+
+def test_cor_true_pred(y_true, y_pred):
+    r, p = stats.spearmanr(y_true, y_pred)
+    rho, p = stats.pearsonr(y_true, y_pred)
+    cor = {'rho': rho, 'r': r}
     return cor

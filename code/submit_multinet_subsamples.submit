@@ -17,7 +17,7 @@ initialdir = /data/project/impulsivity/Prediction_HCP/code
 executable = $(initialdir)/run_in_venv.sh
 transfer_executable = False
 
-arguments = HCP_env python prediction_SVR_nestedCV.py $(dat) rel/subsamples/$(beh_f_i) $(beh) $(pipe)
+arguments = HCP_env python prediction_nestedCV.py $(dat) rel/subsamples/$(beh_f_i) $(beh) $(pipe)
 
 # Job
 log         = $(initialdir)/logs/simulations/subsamples/250_10/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).log
