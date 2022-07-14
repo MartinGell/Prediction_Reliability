@@ -1,0 +1,28 @@
+# Run specific variables
+dat = Schaefer400x17_nodenoise_UKB_5000.jay
+beh = Age_when_attended_assessment_centre-2.0
+pipe = ridgeCV_zscore
+
+
+# The environment
+universe    = vanilla
+getenv      = True
+
+# Resources
+request_cpus   = 1
+request_memory = 5G
+request_disk   = 1G
+
+# Execution
+initialdir = /data/project/ukb_reliability_in_prediction/code
+executable = $(initialdir)/run_in_venv.sh
+transfer_executable = False
+
+arguments = HCP_env python prediction_nestedCV.py $(dat) rel/subsamples/$(beh_f_i) $(beh) $(pipe)
+
+# Job
+log         = $(initialdir)/logs/simulations/subsamples/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).log
+output      = $(initialdir)/logs/simulations/subsamples/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).out
+error       = $(initialdir)/logs/simulations/subsamples/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).err
+
+queue beh_f_i from opts/UKB_age_noise.txt
