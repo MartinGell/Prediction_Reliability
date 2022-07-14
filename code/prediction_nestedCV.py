@@ -115,6 +115,9 @@ else:
 inner_cv = KFold(n_splits=k_inner, shuffle=True, random_state=rs)
 outer_cv = RepeatedKFold(n_splits=k_outer, n_repeats=n_outer, random_state=rs)
 
+# extra stuff for naming files
+beh_f = beh_file.split('.')[0]
+beh_f = beh_f.split('/')
 
 # Only predict if requested
 if predict:
@@ -147,6 +150,7 @@ if predict:
         print(f'CV with {n_outer}x{k_outer}:')
         #databased_C = heuristic_C(data_df=None)
 
+    # Print results
     mean_accuracy = cv_res.mean()
     print(f'Overall MEAN accuracy:')
     print(mean_accuracy)
@@ -155,28 +159,26 @@ if predict:
     print(f'Overall SD accuracy:')
     print(sd_accuracy)
 
-#%%
-# Save cv results
-beh_f = beh_file.split('.')[0]
-beh_f = beh_f.split('/')
+    # Save results of CV
+    src_fc = ''.join(FC_file.split('.')[0:-1])
+    if zscr:
+        src_fc = f'{src_fc}_zscored'
+    
+    # CV results
+    out_file = out_dir / 'cv'
+    out_file.mkdir(parents=True, exist_ok=True)
+    out_file = out_file / f"pipe_{pipe}-source_{src_fc}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
+    print(f'saving: {out_file}')
+    cv_res.to_csv(out_file, index=False)
 
-src_fc = ''.join(FC_file.split('.')[0:-1])
-if zscr:
-    src_fc = f'{src_fc}_zscored'
+    # Averaged CV results
+    out_file = out_dir / 'mean_accuracy'
+    out_file.mkdir(parents=True, exist_ok=True)
+    out_file = out_file / f"pipe_{pipe}_averaged-source_{src_fc}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
+    print(f'saving averaged accuracy: {out_file}')
+    mean_accuracy.to_frame().transpose().to_csv(out_file, index=False)
 
-out_file = out_dir / 'cv'
-out_file.mkdir(parents=True, exist_ok=True)
-out_file = out_file / f"pipe_{pipe}-source_{src_fc}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
-print(f'saving: {out_file}')
-cv_res.to_csv(out_file, index=False)
-
-out_file = out_dir / 'mean_accuracy'
-out_file.mkdir(parents=True, exist_ok=True)
-out_file = out_file / f"pipe_{pipe}_averaged-source_{src_fc}-beh_{beh_f[len(beh_f)-1]}_{beh}-rseed_{rs}-cv_res.csv"
-print(f'saving averaged accuracy: {out_file}')
-mean_accuracy.to_frame().transpose().to_csv(out_file, index=False)
-
-print('FINISHED')
+    print('FINISHED WITH PREDICTION')
 
 #%%
 if val_split:
