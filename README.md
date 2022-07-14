@@ -2,7 +2,7 @@
 
 This repository has been created for prediction of behavioural and simualted behavioural data on Juseless. It has been optimised for faster computation times given that many predictions of simualted data need to be ran.
 
-The submit file contains the most important options for prediction:
+Main prediction script is `prediction_nestedCV.py`. to run it use the submit files. The submit file contains the most important options for prediction:
 1. Pipeline/algorithm = `pipe`
 2. FC file = `dat`
 3. Behaviour to predict = `beh`
