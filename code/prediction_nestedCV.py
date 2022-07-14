@@ -30,6 +30,9 @@ k_outer = 10            # k folds for CV
 n_outer = 5             # n repeats for CV
 rs = 123456             # random state: int for reproducibility or None
 
+predict = True          # predict or just subsample?
+subsample = True        # Subsample data and compute learning curves?
+
 zscr = True             # zscore data
 designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
@@ -37,11 +40,9 @@ val_split_size = 0.2    # Size of validation held out sample
 
 #res_folder = 'exact_distribution'
 
-# array or empty array (np.empty(0)) of subsamples to simulate
-subsample = np.empty(0)
-#subsample = np.array([195,295,395]) # these are only train + 55 test makes 250, 350 and 450
-#subsample = np.array([3500,2500,1500,500]) # these are only train + 500 test makes 4k, 3k, 2k and 1k
-if subsample.any():
+if subsample:
+    #subsample_Ns = np.array([195,295,395]) # these are only train + 55 test makes 250, 350 and 450
+    subsample_Ns = np.geomspace(250,4500,8)/4500 # Fractions of total in case some rows from FC are removed
     n_sample = 100
     k_sample = 0.1
     res_folder = 'subsamples'
@@ -101,6 +102,7 @@ if zscr:
     FCs = FCs.apply(lambda V: zscore(V), axis=1, result_type='broadcast')
     print('FCs zscored')
 
+
 #%%
 # remove hold out data
 if val_split:
@@ -113,41 +115,45 @@ else:
 inner_cv = KFold(n_splits=k_inner, shuffle=True, random_state=rs)
 outer_cv = RepeatedKFold(n_splits=k_outer, n_repeats=n_outer, random_state=rs)
 
-# Run CV 
-if nested == 1: # Nested CV with parameter optimization
-    print('Using nested CV..')
-    print(f'Hyperparam search with {n_outer}x{k_outer}x{k_inner} over:')
-    print(f'{grid}')
-    grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
-        cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None    
-    scores = cross_validate(grid_search, X, np.ravel(y), scoring=scoring, cv=outer_cv,
-        return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
-    # results
-    cv_res = pd.DataFrame(scores)
-    for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)             # put to utils?
-elif nested == 0: # non-nested CV
-    print('Using vanilla CV..')
-    print(f'CV with {n_outer}x{k_outer}:')
-    scores = cross_validate(model, X, np.ravel(y), scoring=scoring, cv=outer_cv,
-        return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
-    # results
-    cv_res = pd.DataFrame(scores)
-    if pipe == 'ridgeCV':                                                   # put to utils?
-        for i in scores['estimator']: print(i.alpha_)
-    elif pipe == 'ridgeCV_zscore':                                          # put to utils?
-        for i in scores['estimator']: print(i[1].alpha_)                       # put to utils?
-elif nested == 99:
-    print('Using a heuristic to determine hyperparams')
-    print(f'CV with {n_outer}x{k_outer}:')
-    #databased_C = heuristic_C(data_df=None)
 
-mean_accuracy = cv_res.mean()
-print(f'Overall MEAN accuracy:')
-print(mean_accuracy)
+# Only predict if requested
+if predict:
+    print('Running Prediction...')
+    # Run CV 
+    if nested == 1: # Nested CV with parameter optimization
+        print('Using nested CV..')
+        print(f'Hyperparam search with {n_outer}x{k_outer}x{k_inner} over:')
+        print(f'{grid}')
+        grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
+            cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None    
+        scores = cross_validate(grid_search, X, np.ravel(y), scoring=scoring, cv=outer_cv,
+            return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
+        # results
+        cv_res = pd.DataFrame(scores)
+        for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)             # put to utils?
+    elif nested == 0: # non-nested CV
+        print('Using vanilla CV..')
+        print(f'CV with {n_outer}x{k_outer}:')
+        scores = cross_validate(model, X, np.ravel(y), scoring=scoring, cv=outer_cv,
+            return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
+        # results
+        cv_res = pd.DataFrame(scores)
+        if pipe == 'ridgeCV':                                                   # put to utils?
+            for i in scores['estimator']: print(i.alpha_)
+        elif pipe == 'ridgeCV_zscore':                                          # put to utils?
+            for i in scores['estimator']: print(i[1].alpha_)                       # put to utils?
+    elif nested == 99:
+        print('Using a heuristic to determine hyperparams')
+        print(f'CV with {n_outer}x{k_outer}:')
+        #databased_C = heuristic_C(data_df=None)
 
-sd_accuracy = cv_res.std()
-print(f'Overall SD accuracy:')
-print(sd_accuracy)
+    mean_accuracy = cv_res.mean()
+    print(f'Overall MEAN accuracy:')
+    print(mean_accuracy)
+
+    sd_accuracy = cv_res.std()
+    print(f'Overall SD accuracy:')
+    print(sd_accuracy)
 
 #%%
 # Save cv results
@@ -207,7 +213,7 @@ if val_split:
     out_file = out_dir / 'predicted' / f"{designator}predicted_res.csv"
     np.savetxt(out_file, y_pred, delimiter=',')
 
-if subsample.any():
+if subsample:
     print('Computing learning curve..')
     # cv
     outer_cv = ShuffleSplit(n_splits=n_sample, test_size=k_sample, random_state=rs)
@@ -215,11 +221,11 @@ if subsample.any():
         print('Using nested CV..')
         grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
             cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None
-        scores = learning_curve(grid_search, X, np.ravel(y), train_sizes=subsample, return_times=True, shuffle=True,
+        scores = learning_curve(grid_search, X, np.ravel(y), train_sizes=subsample_Ns, return_times=True, shuffle=True,
             cv=outer_cv, scoring='r2', verbose=3, n_jobs=1, random_state=rs)
     elif nested == 0:
         print('Using vanilla CV..')
-        scores = learning_curve(model, X, np.ravel(y), train_sizes=subsample, return_times=True, shuffle=True,
+        scores = learning_curve(model, X, np.ravel(y), train_sizes=subsample_Ns, return_times=True, shuffle=True,
             cv=outer_cv, scoring='r2', verbose=3, n_jobs=1, random_state=rs)
 
     # results
@@ -233,6 +239,12 @@ if subsample.any():
 
     sample_test_res = pd.DataFrame(test_errors, columns=cols)
     sample_train_res = pd.DataFrame(train_errors, columns=cols)
+
+    print(f'Overall MEAN accuracy:')
+    print(sample_test_res.mean())
+
+    print(f'Overall SD accuracy:')
+    print(sample_test_res.std())
     
     # save train
     out_file = out_dir / 'learning_curve'
