@@ -8,6 +8,8 @@
 /figures
 /code_figures
 /code/dev/*
+/text_files/OLD/*
+/text_files/rel/*
 
 
 ### JupyterNotebooks ###
