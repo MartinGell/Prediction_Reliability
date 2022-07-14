@@ -232,15 +232,8 @@ if subsample:
 
     # results
     train_size, train_scores, test_scores = scores[:3]
-    #train_errors, test_errors = np.transpose(-train_scores), np.transpose(-test_scores)
-    train_errors = np.transpose(train_scores)
-    test_errors = np.transpose(test_scores)
-    cols = list()
-    #for i in train_size[:]: cols.append(f'x{str(i)}')
-    for i in train_size[:]: cols.append(i+55)
-
-    sample_test_res = pd.DataFrame(test_errors, columns=cols)
-    sample_train_res = pd.DataFrame(train_errors, columns=cols)
+    sample_test_res = pd.DataFrame(np.transpose(test_scores), columns=train_size)
+    sample_train_res = pd.DataFrame(np.transpose(train_scores), columns=train_size)
 
     print(f'Overall MEAN accuracy:')
     print(sample_test_res.mean())

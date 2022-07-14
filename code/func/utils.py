@@ -31,8 +31,8 @@ def heuristic_C(data_df=None):
 
 def filter_outliers(tab, beh):
     tab['z'] = stats.zscore(tab.loc[:,[beh]])
-    outliers = tab.loc[abs(tab['z']) > 3]
-    tab = tab.loc[abs(tab['z']) < 3]
+    outliers = tab.loc[abs(tab['z']) > 4]
+    tab = tab.loc[abs(tab['z']) < 4]
     if not outliers.empty:
         print(f'Removed {len(outliers)} outliers')
         print(f'{outliers}')
