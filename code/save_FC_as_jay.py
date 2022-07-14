@@ -1,19 +1,23 @@
 
 # Load all files, unpickle them, and save them to a new file
+# Requirements:
+#   - all FC files must be in the same folder
+#   - datatable library (https://datatable.readthedocs.io/en/latest/?badge=latest)
 
 import numpy as np
 import pandas as pd
 import datatable as dt
 
 # paths
-path2beh = '/tmp/tmp_amir/for_Martin'
-outpath = '/data/project/ukb_reliability_in_prediction/input'
+path2FCs = '/tmp/tmp_amir/for_Martin/random_FC_matrices' # currently the random FCs
+path2sub_list = '/tmp/tmp_amir/for_Martin' # where is the csv with list of 5k subs
+outpath = '/data/project/ukb_reliability_in_prediction/input' # where to save .jay file
 
 # Load beh_file
-#beh = pd.read_csv(f'{path2beh}/UKB_5000_subs_FC_behav.csv')
-x = np.linspace(0,99,100)
-x = np.delete(x,41)
-beh = pd.DataFrame(x, columns=['eid'])
+beh = pd.read_csv(f'{path2sub_list}/UKB_5000_subs_FC_behav.csv')
+#x = np.linspace(0,99,100)
+#x = np.delete(x,41)
+#beh = pd.DataFrame(x, columns=['eid'])
 sampled_subs = beh['eid']
 
 # save into one table
@@ -23,7 +27,7 @@ data = np.empty((0,int(cols))) # data should be subs*regions
 subs = np.empty((0,1))         # subs should be subs*1
 
 for sub in sampled_subs:
-    f_i = f'FC_{int(sub)}.npz'
+    f_i = f'{path2FCs}/FC_{int(sub)}.npz'
     f = np.load(f_i)
     fc = f['correlation_matrix']
 
