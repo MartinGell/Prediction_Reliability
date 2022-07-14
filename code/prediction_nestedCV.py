@@ -30,23 +30,23 @@ k_outer = 10            # k folds for CV
 n_outer = 5             # n repeats for CV
 rs = 123456             # random state: int for reproducibility or None
 
-predict = True          # predict or just subsample?
+predict = False         # predict or just subsample?
 subsample = True        # Subsample data and compute learning curves?
 
 zscr = True             # zscore data
-designator = 'test'     # char designation of output file
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.2    # Size of validation held out sample
 
-#res_folder = 'exact_distribution'
+#res_folder = 'test'    # save results separately to ...
+#designator = 'test'    # string designation of output file
 
 if subsample:
     #subsample_Ns = np.array([195,295,395]) # these are only train + 55 test makes 250, 350 and 450
     subsample_Ns = np.geomspace(250,4500,8)/4500 # Fractions of total in case some rows from FC are removed
-    n_sample = 100
-    k_sample = 0.1
+    n_sample = 100      # number of samples to draw from data
+    k_sample = 0.1      # fraction of data to use as test set
     res_folder = 'subsamples'
-    print(f'Subsampling: {subsample}, each {n_sample} times with {k_sample*100}% left out')
+    print(f'Subsampling: {subsample_Ns}, each {n_sample} times with {k_sample*100}% left out')
 
 score_pearson = metrics.make_scorer(cor_true_pred_pearson, greater_is_better=True)
 score_spearman = metrics.make_scorer(cor_true_pred_spearman, greater_is_better=True)
