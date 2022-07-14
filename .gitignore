@@ -7,7 +7,7 @@
 /res/*
 /figures
 /code_figures
-
+/code/dev/*
 
 
 ### JupyterNotebooks ###
