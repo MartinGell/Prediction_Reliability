@@ -9,9 +9,10 @@ import pandas as pd
 import datatable as dt
 
 # paths
-path2FCs = '/tmp/tmp_amir/for_Martin/random_FC_matrices' # currently the random FCs
-path2sub_list = '/tmp/tmp_amir/for_Martin' # where is the csv with list of 5k subs
-outpath = '/data/project/ukb_reliability_in_prediction/input' # where to save .jay file
+#path2FCs = '/tmp/tmp_amir/for_Martin/random_FC_matrices' # currently the random FCs
+path2FCs = '/data/project/ukb_reliability_in_prediction/Prediction_HCP/text_files/aomidvarnia' # currently the random FCs
+path2sub_list = '/data/project/ukb_reliability_in_prediction/Prediction_HCP/text_files' # where is the csv with list of 5k subs
+outpath = '/data/project/ukb_reliability_in_prediction/Prediction_HCP/input' # where to save .jay file
 
 # Load beh_file
 beh = pd.read_csv(f'{path2sub_list}/UKB_5000_subs_FC_behav.csv')

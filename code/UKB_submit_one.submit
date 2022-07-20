@@ -15,11 +15,11 @@ request_memory = 5G
 request_disk   = 1G
 
 # Execution
-initialdir = /data/project/ukb_reliability_in_prediction/code
+initialdir = /data/project/ukb_reliability_in_prediction/prediction_UKB/code
 executable = $(initialdir)/run_in_venv.sh
 transfer_executable = False
 
-arguments = HCP_env python prediction_nestedCV.py $(dat) rel/$(beh_f) $(beh) $(pipe)
+arguments = HCP_env python prediction_nestedCV.py $(dat) $(beh_f) $(beh) $(pipe)
 
 # Job
 log         = $(initialdir)/logs/simulations/$(beh_f)_$(beh)_$(pipe)_$(Cluster).$(Process).log

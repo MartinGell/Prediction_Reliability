@@ -14,7 +14,7 @@ request_memory = 5G
 request_disk   = 1G
 
 # Execution
-initialdir = /data/project/ukb_reliability_in_prediction/code
+initialdir = /data/project/ukb_reliability_in_prediction/prediction_UKB/code
 executable = $(initialdir)/run_in_venv.sh
 transfer_executable = False
 
