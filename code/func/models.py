@@ -8,15 +8,18 @@ from sklearn.kernel_ridge import KernelRidge
 from sklearn.pipeline import make_pipeline
 from sklearn.svm import SVR, LinearSVR
 
+from sklearn.compose import ColumnTransformer
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.preprocessing import QuantileTransformer, StandardScaler
 
 from func.heuristicModels import LinearSVRHeuristicC, SVRHeuristicC
+from func.confound_removal import ConfoundRemover
+
 
 
 __all__ = ['model_choice']
 
-def model_choice(pipe):
+def model_choice(pipe, confound = list(), cat_columns = list()):
     if pipe == 'svr':
         nested = 1 # using nested cv
         model = SVR()
@@ -31,6 +34,19 @@ def model_choice(pipe):
     elif pipe == 'svr_heuristic_zscore':
         nested = 0 # using nested cv
         model = make_pipeline(StandardScaler(),SVRHeuristicC(kernel="linear"))
+        grid = []
+    elif pipe == 'svr_heuristic_zscore_confound_removal_wcategorical':
+        nested = 0 # using nested cv
+        categorical_columns = cat_columns#['Gender']
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("cat", "passthrough", categorical_columns)],
+                remainder=StandardScaler())
+        model = make_pipeline(
+            preprocessor, 
+            ConfoundRemover(n_confounds=len(confound)), 
+            SVRHeuristicC(kernel="linear")
+            )
         grid = []
     elif pipe == 'svr_L1':
         nested = 1 # using nested cv
@@ -90,7 +106,32 @@ def model_choice(pipe):
     elif pipe == 'ridgeCV_zscore':
         nested = 0 # using nested cv
         alphas = [1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
-        model = make_pipeline(StandardScaler(),RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error"))
+        model = make_pipeline(
+            StandardScaler(),RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
+            )
+        grid = []
+    elif pipe == 'ridgeCV_zscore_confound_removal':
+        nested = 0 # using nested cv
+        alphas = [1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
+        model = make_pipeline(
+            StandardScaler(), 
+            ConfoundRemover(n_confounds=len(confound)), 
+            RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
+            )
+        grid = []
+    elif pipe == 'ridgeCV_zscore_confound_removal_wcategorical':
+        nested = 0 # using nested cv
+        alphas = [1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]
+        categorical_columns = cat_columns#['Gender']
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("cat", "passthrough", categorical_columns)],
+                remainder=StandardScaler())
+        model = make_pipeline(
+            preprocessor, 
+            ConfoundRemover(n_confounds=len(confound)), 
+            RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
+            )
         grid = []
     elif pipe == 'kridge':
         nested = 1 # using nested cv

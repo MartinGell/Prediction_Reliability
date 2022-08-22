@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import stats
 
 
-__all__ = ['heuristic_C','filter_outliers','sort_files','transform2SD','cor_true_pred_pearson','cor_true_pred_pearson','test_cor_true_pred']
+__all__ = ['heuristic_C','filter_outliers','sort_files','transform2SD','cor_true_pred_pearson','cor_true_pred_pearson','test_cor_true_pred','prep_confs']
 
 
 def heuristic_C(data_df=None):
@@ -24,24 +24,31 @@ def heuristic_C(data_df=None):
         raise Exception('No data was provided.')
 
     C = 1/np.mean(np.sqrt((data_df**2).sum(axis=1)))
+    print(f'Using C = {C} based on heuritic (C = 1/mean(sqrt(rowSums(data^2))))')
     # Formular Kaustubh: C = 1/mean(sqrt(rowSums(data^2)))
 
     return C
 
 
-def filter_outliers(tab, beh):
+def filter_outliers(tab, beh, SD=3):
+    print(f'\nFiltering outliers using {SD} SD...')
     tab['z'] = stats.zscore(tab.loc[:,[beh]])
-    outliers = tab.loc[abs(tab['z']) > 4]
-    tab = tab.loc[abs(tab['z']) < 4]
+    outliers = tab.loc[abs(tab['z']) > SD]
+    tab = tab.loc[abs(tab['z']) < SD]
     if not outliers.empty:
-        print(f'Removed {len(outliers)} outliers')
+        print(f'Removed {len(outliers)} outliers!')
         print(f'{outliers}')
+    else:
+        print('No outliers found!')
     
     return tab
 
 
 def sort_files(tab, FCs):
-    print('Sorting and filtering')
+    print('\nSorting and filtering...')
+    #tab.iloc[:,0] = tab.iloc[:,0].astype(int)
+    #FCs.iloc[:,0] = FCs.iloc[:,0].astype(int)
+
     FCs = FCs.sort_values(by=FCs.keys()[0])
     tab = tab.sort_values(by=tab.keys()[0])
 
@@ -144,3 +151,21 @@ def test_cor_true_pred(y_true, y_pred):
     rho, p = stats.pearsonr(y_true, y_pred)
     cor = {'rho': rho, 'r': r}
     return cor
+
+
+def prep_confs(tab_all, confounds, wd, FC_file):
+    if FC_file == 'Schaefer400x17_WM+CSF+GS_hcpaging_695.csv':
+        empirical_file = 'HCP_A_cryst.csv'
+        path2file = wd / 'text_files' / 'rel' / empirical_file
+        empirical_data = pd.read_csv(path2file)
+
+        print(f'Getting confs from: {empirical_file}')
+        for conf_i in confounds:
+            print(f'Adding {conf_i}')
+            conf2add = empirical_data[f'{conf_i}']
+            conf2add.reset_index(inplace=True, drop=True)
+            #FCs = FCs.append(tab[f'{conf_i}'], ignore_index=True)
+            tab_all[f'{conf_i}'] = conf2add
+    
+    return tab_all
+
