@@ -10,43 +10,44 @@ from pathlib import Path
 from sklearn import metrics
 from scipy.stats import zscore
 
-from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman
+from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman, prep_confs
 from func.models import model_choice
 from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV
-#import matplotlib.pyplot as plt
 
 
 ### Set params ###
-pipe = sys.argv[4]
-#FC_file = 'seitzman_nodes_average_runs_REST1_REST1_REST2_REST2-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt0.1_0.01.csv'
 FC_file = sys.argv[1]
-#beh_file = 'beh_HCP_A_motor.csv'
 beh_file = sys.argv[2]
-#beh = 'interview_age' #'nih_tlbx_agecsc_dominant' #'interview_age'  'nih_tlbx_agecsc_dominant'
 beh = sys.argv[3]
+pipe = sys.argv[4]
 
 k_inner = 5             # k folds for hyperparam search
 k_outer = 10            # k folds for CV
 n_outer = 5             # n repeats for CV
 rs = 123456             # random state: int for reproducibility or None
 
-predict = False         # predict or just subsample?
-subsample = True        # Subsample data and compute learning curves?
+predict = True          # predict or just subsample?
+subsample = False       # Subsample data and compute learning curves?
 
-zscr = True             # zscore data
+remove_confounds = True # Remove confounds?
+confs_in_file = True    # False = confs in beh file, otherwise it loads them from empirical data
+confounds = ['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol'] # 'FS_Total_GM_Vol'
+categorical = ['gender'] #['Sex']   # of which categorical?
+
+zscr = True             # zscore features
 val_split = False       # Split data to train and held out validation?
-val_split_size = 0.2    # Size of validation held out sample
+val_split_size = 0.1    # Size of validation held out sample
 
 #res_folder = 'test'    # save results separately to ...
 #designator = 'test'    # string designation of output file
 
 if subsample:
     #subsample_Ns = np.array([195,295,395]) # these are only train + 55 test makes 250, 350 and 450
-    subsample_Ns = np.geomspace(250,4500,8)/4500 # Fractions of total in case some rows from FC are removed
+    subsample_Ns = np.geomspace(250,4450,7).astype('int')
     n_sample = 100      # number of samples to draw from data
     k_sample = 0.1      # fraction of data to use as test set
     res_folder = 'subsamples'
-    print(f'Subsampling: {subsample_Ns}, each {n_sample} times with {k_sample*100}% left out')
+    print(f'\nSubsampling: {subsample_Ns}, each {n_sample} times with {k_sample*100}% left out\n')
 
 score_pearson = metrics.make_scorer(cor_true_pred_pearson, greater_is_better=True)
 score_spearman = metrics.make_scorer(cor_true_pred_spearman, greater_is_better=True)
@@ -70,8 +71,12 @@ if 'res_folder' in locals():
 path2beh = wd / 'text_files' / beh_file
 tab_all = pd.read_csv(path2beh) # beh data
 tab_all = tab_all.dropna(subset = [beh]) # drop nans if there are in beh of interest
-print(f'Using {beh}')
+print(f'\nUsing {beh}')
 print(f'Behaviour data shape: {tab_all.shape}')
+
+# attach confounds to tab_all if not there already before filtering
+if confs_in_file:
+    tab_all = prep_confs(tab_all, wd, FC_file)
 
 # remove outliers
 tab_all = filter_outliers(tab_all,beh)
@@ -84,32 +89,53 @@ path2FC = wd / 'input' / FC_file
 #path2FC = path2FC / 'Preprocess_HCP' / 'res' / FC_file
 #FCs_all = pd.read_csv(path2FC)
 FCs_all = dt.fread(path2FC)
+#FCs_all.materialize(to_memory=True)
 FCs_all = FCs_all.to_pandas()
-print(f'Using {FC_file}')
+print(f'\nUsing {FC_file}')
 print(f'FC data shape: {FCs_all.shape}')
 
 # Filter FC subs based on behaviour subs
 tab, FCs = sort_files(tab_all, FCs_all)
 # transform scores to SD_scores -> not sure if this is the right place for it
 #tab, beh = transform2SD(tab, beh, 'outlier')
-tab = tab.loc[:, [beh]]
+
+# set up X and y for prediction
+target = tab.loc[:, [beh]]
 FCs.pop(FCs.keys()[0])
-print('FCs after removing subjects:')
+print('\nFCs after removing subjects:')
 print(FCs.head())
 
-# optionaly zscore FCs
+# optionaly zscore FCs rowwise -> no data leakage
 if zscr:
+    print('\nZscoring FCs...')
     FCs = FCs.apply(lambda V: zscore(V), axis=1, result_type='broadcast')
-    print('FCs zscored')
+    print('zscored')
+else:
+    print('\nNot zscoring!')
 
+# set up for confound removal
+if remove_confounds:
+    print('\nSetting up for confound removal...')
+    nested, model, grid = model_choice(pipe,confound=confounds,cat_columns=categorical)
+    FCs.reset_index(inplace=True, drop=True)
+    for conf_i in confounds:
+        print(f'Adding {conf_i}')
+        conf2remove = tab[f'{conf_i}']
+        conf2remove.reset_index(inplace=True, drop=True)
+        #FCs = FCs.append(tab[f'{conf_i}'], ignore_index=True)
+        FCs[f'{conf_i}'] = conf2remove
+else:
+    print('\nNot removing confounds!')
+
+#FCs[tab_all.isna().any(axis=1)]
 
 #%%
 # remove hold out data
 if val_split:
-    X, X_val, y, y_val = train_test_split(FCs, tab, test_size=val_split_size, random_state=rs)
+    X, X_val, y, y_val = train_test_split(FCs, target, test_size=val_split_size, random_state=rs)
 else:
     X = FCs
-    y = tab
+    y = target
 
 # CV set up
 inner_cv = KFold(n_splits=k_inner, shuffle=True, random_state=rs)
@@ -121,10 +147,10 @@ beh_f = beh_f.split('/')
 
 # Only predict if requested
 if predict:
-    print('Running Prediction...')
+    print('\nRunning Prediction...')
     # Run CV 
     if nested == 1: # Nested CV with parameter optimization
-        print('Using nested CV..')
+        print('Using nested CV!')
         print(f'Hyperparam search with {n_outer}x{k_outer}x{k_inner} over:')
         print(f'{grid}')
         grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
@@ -135,7 +161,7 @@ if predict:
         cv_res = pd.DataFrame(scores)
         for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)             # put to utils?
     elif nested == 0: # non-nested CV
-        print('Using vanilla CV..')
+        print('Using vanilla CV!')
         print(f'CV with {n_outer}x{k_outer}:')
         scores = cross_validate(model, X, np.ravel(y), scoring=scoring, cv=outer_cv,
             return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
@@ -145,10 +171,7 @@ if predict:
             for i in scores['estimator']: print(i.alpha_)
         elif pipe == 'ridgeCV_zscore':                                          # put to utils?
             for i in scores['estimator']: print(i[1].alpha_)                       # put to utils?
-    elif nested == 99:
-        print('Using a heuristic to determine hyperparams')
-        print(f'CV with {n_outer}x{k_outer}:')
-        #databased_C = heuristic_C(data_df=None)
+
 
     # Print results
     mean_accuracy = cv_res.mean()
@@ -178,11 +201,11 @@ if predict:
     print(f'saving averaged accuracy: {out_file}')
     mean_accuracy.to_frame().transpose().to_csv(out_file, index=False)
 
-    print('FINISHED WITH PREDICTION')
+    print('\nFINISHED WITH PREDICTION\n')
 
 #%%
 if val_split:
-    print('WARNING: TAKING FIRST ESTIMATOR FROM ALL CVs.')
+    print('\nWARNING: TAKING FIRST ESTIMATOR FROM ALL CVs.')
     print('IF DIFFERENT WILL IMPACT FOLLOWING RESULTS.')
     params = cv_res.iloc[0,2].get_params
 
@@ -216,17 +239,17 @@ if val_split:
     np.savetxt(out_file, y_pred, delimiter=',')
 
 if subsample:
-    print('Computing learning curve..')
+    print('\nComputing learning curve...')
     # cv
     outer_cv = ShuffleSplit(n_splits=n_sample, test_size=k_sample, random_state=rs)
     if nested == 1:
-        print('Using nested CV..')
+        print('Using nested CV!')
         grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
             cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None
         scores = learning_curve(grid_search, X, np.ravel(y), train_sizes=subsample_Ns, return_times=True, shuffle=True,
             cv=outer_cv, scoring='r2', verbose=3, n_jobs=1, random_state=rs)
     elif nested == 0:
-        print('Using vanilla CV..')
+        print('Using vanilla CV!')
         scores = learning_curve(model, X, np.ravel(y), train_sizes=subsample_Ns, return_times=True, shuffle=True,
             cv=outer_cv, scoring='r2', verbose=3, n_jobs=1, random_state=rs)
 
