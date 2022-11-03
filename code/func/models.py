@@ -19,7 +19,12 @@ from func.confound_removal import ConfoundRemover
 
 __all__ = ['model_choice']
 
-def model_choice(pipe, confound = list(), cat_columns = list()):
+def model_choice(pipe, X = None, confound = None, cat_columns = None):
+    # if X is None:
+    #     X = pd.DataFrame()
+    #     confound = pd.DataFrame()
+    #     cat_columns = []
+
     if pipe == 'svr':
         nested = 1 # using nested cv
         model = SVR()
@@ -38,14 +43,17 @@ def model_choice(pipe, confound = list(), cat_columns = list()):
     elif pipe == 'svr_heuristic_zscore_confound_removal_wcategorical':
         nested = 0 # using nested cv
         categorical_columns = cat_columns#['Gender']
+        continous_columns = [col for col in X.columns.to_list() if col not in cat_columns]
         preprocessor = ColumnTransformer(
             transformers=[
+                ("cont",StandardScaler(), continous_columns),
                 ("cat", "passthrough", categorical_columns)],
-                remainder=StandardScaler())
+        # remainder=PassThrough() -> will drop any further columns by default
+        )
         model = make_pipeline(
-            preprocessor, 
-            ConfoundRemover(n_confounds=len(confound)), 
-            SVRHeuristicC(kernel="linear")
+            preprocessor,
+            ConfoundRemover(n_confounds=len(confound)),
+            RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
             )
         grid = []
     elif pipe == 'svr_L1':
@@ -110,6 +118,13 @@ def model_choice(pipe, confound = list(), cat_columns = list()):
             StandardScaler(),RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
             )
         grid = []
+    elif pipe == 'ridgeCV_zscore_stratified_KFold':
+        nested = 99 # using nested cv
+        alphas = [1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
+        model = make_pipeline(
+            StandardScaler(),RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
+            )
+        grid = []
     elif pipe == 'ridgeCV_zscore_confound_removal':
         nested = 0 # using nested cv
         alphas = [1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
@@ -123,6 +138,23 @@ def model_choice(pipe, confound = list(), cat_columns = list()):
         nested = 0 # using nested cv
         alphas = [1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]
         categorical_columns = cat_columns#['Gender']
+        continous_columns = [col for col in X.columns.to_list() if col not in cat_columns]
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("cont",StandardScaler(), continous_columns),
+                ("cat", "passthrough", categorical_columns)],
+        # remainder=PassThrough() -> will drop any further columns by default
+        )
+        model = make_pipeline(
+            preprocessor,
+            ConfoundRemover(n_confounds=len(confound)),
+            RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
+            )
+        grid = []
+    elif pipe == 'BAD':
+        nested = 99 # using nested cv
+        alphas = [1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
+        categorical_columns = cat_columns#['Gender']
         preprocessor = ColumnTransformer(
             transformers=[
                 ("cat", "passthrough", categorical_columns)],
@@ -130,6 +162,23 @@ def model_choice(pipe, confound = list(), cat_columns = list()):
         model = make_pipeline(
             preprocessor, 
             ConfoundRemover(n_confounds=len(confound)), 
+            RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
+            )
+        grid = []
+    elif pipe == 'ridgeCV_zscore_stratified_KFold_confound_removal_wcategorical':
+        nested = 99 # using nested cv
+        alphas = [1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
+        categorical_columns = cat_columns#['Gender']
+        continous_columns = [col for col in X.columns.to_list() if col not in cat_columns]
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("cont",StandardScaler(), continous_columns),
+                ("cat", "passthrough", categorical_columns)],
+        # remainder=PassThrough() -> will drop any further columns by default
+        )
+        model = make_pipeline(
+            preprocessor,
+            ConfoundRemover(n_confounds=len(confound)),
             RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
             )
         grid = []

@@ -12,7 +12,7 @@ from scipy.stats import zscore
 
 from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman, prep_confs
 from func.models import model_choice
-from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV
+from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV, GroupShuffleSplit
 
 
 ### Set params ###
@@ -26,13 +26,13 @@ k_outer = 10            # k folds for CV
 n_outer = 5             # n repeats for CV
 rs = 123456             # random state: int for reproducibility or None
 
-predict = True          # predict or just subsample?
-subsample = False       # Subsample data and compute learning curves?
+predict = False          # predict or just subsample?
+subsample = True       # Subsample data and compute learning curves?
 
-remove_confounds = True # Remove confounds?
-confs_in_file = True    # False = confs in beh file, otherwise it loads them from empirical data
-confounds = ['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol'] # 'FS_Total_GM_Vol'
-categorical = ['gender'] #['Sex']   # of which categorical?
+remove_confounds = False # Remove confounds?
+confs_in_file = True   # False = confs in beh file, otherwise it loads them from empirical data
+confounds = ['Age', 'Sex'] #['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol'] # 'FS_Total_GM_Vol'
+categorical = ['Sex'] #['gender'] #['Sex']   # of which categorical?
 
 zscr = True             # zscore features
 val_split = False       # Split data to train and held out validation?
@@ -42,8 +42,7 @@ val_split_size = 0.1    # Size of validation held out sample
 #designator = 'test'    # string designation of output file
 
 if subsample:
-    #subsample_Ns = np.array([195,295,395]) # these are only train + 55 test makes 250, 350 and 450
-    subsample_Ns = np.geomspace(250,4450,7).astype('int')
+    subsample_Ns = np.geomspace(200,580,4).astype('int') # this needs to exclude test set of 10%
     n_sample = 100      # number of samples to draw from data
     k_sample = 0.1      # fraction of data to use as test set
     res_folder = 'subsamples'
@@ -56,10 +55,6 @@ scoring = {"RMSE": "neg_root_mean_squared_error", "MAE": "neg_mean_absolute_erro
 
 
 #%%
-# start message
-nested, model, grid = model_choice(pipe)
-print(f'Running prediction with {model}')
-
 # paths
 wd = os.getcwd()
 wd = Path(os.path.dirname(wd))
@@ -75,8 +70,9 @@ print(f'\nUsing {beh}')
 print(f'Behaviour data shape: {tab_all.shape}')
 
 # attach confounds to tab_all if not there already before filtering
-if confs_in_file:
-    tab_all = prep_confs(tab_all, wd, FC_file)
+if remove_confounds:
+    if confs_in_file:
+        tab_all = prep_confs(tab_all, confounds, wd, FC_file)
 
 # remove outliers
 tab_all = filter_outliers(tab_all,beh)
@@ -116,8 +112,10 @@ else:
 # set up for confound removal
 if remove_confounds:
     print('\nSetting up for confound removal...')
-    nested, model, grid = model_choice(pipe,confound=confounds,cat_columns=categorical)
+    nested, model, grid = model_choice(pipe,X=FCs,confound=confounds,cat_columns=categorical)
     FCs.reset_index(inplace=True, drop=True)
+    print(f'Running prediction with {model}')
+
     for conf_i in confounds:
         print(f'Adding {conf_i}')
         conf2remove = tab[f'{conf_i}']
@@ -126,6 +124,8 @@ if remove_confounds:
         FCs[f'{conf_i}'] = conf2remove
 else:
     print('\nNot removing confounds!')
+    nested, model, grid = model_choice(pipe)
+    print(f'Running prediction with {model}')
 
 #FCs[tab_all.isna().any(axis=1)]
 
@@ -152,7 +152,7 @@ if predict:
     if nested == 1: # Nested CV with parameter optimization
         print('Using nested CV!')
         print(f'Hyperparam search with {n_outer}x{k_outer}x{k_inner} over:')
-        print(f'{grid}')
+        print(f'{grid}\n')
         grid_search = GridSearchCV(estimator=model, param_grid=grid, n_jobs=1,
             cv=inner_cv, scoring="neg_root_mean_squared_error", verbose=3) # on Juseless n_jobs=None    
         scores = cross_validate(grid_search, X, np.ravel(y), scoring=scoring, cv=outer_cv,
@@ -162,7 +162,7 @@ if predict:
         for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)             # put to utils?
     elif nested == 0: # non-nested CV
         print('Using vanilla CV!')
-        print(f'CV with {n_outer}x{k_outer}:')
+        print(f'CV with {n_outer}x{k_outer}\n')
         scores = cross_validate(model, X, np.ravel(y), scoring=scoring, cv=outer_cv,
             return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
         # results
@@ -171,6 +171,25 @@ if predict:
             for i in scores['estimator']: print(i.alpha_)
         elif pipe == 'ridgeCV_zscore':                                          # put to utils?
             for i in scores['estimator']: print(i[1].alpha_)                       # put to utils?
+    elif nested == 99:
+        print('Using stratified vanilla CV!')
+        splits = (n_outer*k_outer)
+        train_size = 0.7
+        group = 'Family_ID'
+        print(f'CV with {splits} splits of {round((1-train_size)*100)}% of groups out')
+        print(f'Grouping variable: {group}\n')
+        outer_cv = GroupShuffleSplit(n_splits=splits, train_size=train_size, random_state=rs)
+        scores = cross_validate(model, X, np.ravel(y), groups=tab[group], scoring=scoring, cv=outer_cv,
+            return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
+        # results
+        cv_res = pd.DataFrame(scores)
+        if pipe == 'ridgeCV':                                                   # put to utils?
+            for i in scores['estimator']: print(i.alpha_)
+        elif pipe.__contains__('confound'):
+            for i in scores['estimator']: print(i[2].alpha_)
+        else:                                          # put to utils?
+            for i in scores['estimator']: print(i[1].alpha_)
+         
 
 
     # Print results
