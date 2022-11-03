@@ -12,7 +12,8 @@ import numpy as np
 pipe = sys.argv[1]
 
 #opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695_zscored-beh_'
-opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpya_316_zscored-beh_'
+#opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpya_316_zscored-beh_'
+opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpya_771_zscored-beh_'
 
 # paths 
 in_path = Path('/data/project/impulsivity/prediction_simulations/res/mean_accuracy')
@@ -38,6 +39,24 @@ elif pipe == 'ridgeCV_z_conf_removed':
     res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}{beh_file}_CogCrystalComp_AgeAdj-rseed_123456-cv_res.csv')
     res['beh'] = first
     behs = pd.read_table('/data/project/impulsivity/prediction_simulations/code/opts/HCP_YA_behs2predict.txt', header=None)
+elif pipe == 'ridgeCV_zscore_stratified_KFold_confound_removal_wcategorical':
+    beh_file = 'HCP_YA_beh_all'
+    pipe = 'ridgeCV_zscore_stratified_KFold_confound_removal_wcategorical'
+    first = 'CogCrystalComp_AgeAdj'
+    # First load empirical results, then append all simulation res to it
+    # ridgeCV_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695-beh_interview_age_interview_age-rseed_123456-cv_res.csv
+    res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}{beh_file}_CogCrystalComp_AgeAdj-rseed_123456-cv_res.csv')
+    res['beh'] = first
+    behs = pd.read_table('/data/project/impulsivity/prediction_simulations/code/opts/HCP_YA_behs2predict.txt', header=None)
+elif pipe == 'ridgeCV_zscore_stratified_KFold':
+    beh_file = 'HCP_YA_beh_confs_all_restricted'
+    pipe = 'ridgeCV_zscore_stratified_KFold'
+    first = 'CogCrystalComp_AgeAdj'
+    # First load empirical results, then append all simulation res to it
+    # ridgeCV_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695-beh_interview_age_interview_age-rseed_123456-cv_res.csv
+    res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}{beh_file}_CogCrystalComp_AgeAdj-rseed_123456-cv_res.csv')
+    res['beh'] = first
+    behs = pd.read_table('/data/project/impulsivity/prediction_simulations/code/opts/HCP_YA_behs2predict.txt', header=None)
 elif pipe == 'svr_heuristic_z_conf_removed':
     beh_file = 'HCP_YA_beh_confs_unrelated'
     pipe = 'svr_heuristic_zscore_confound_removal_wcategorical'
@@ -47,6 +66,7 @@ elif pipe == 'svr_heuristic_z_conf_removed':
     res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}{beh_file}_CogCrystalComp_AgeAdj-rseed_123456-cv_res.csv')
     res['beh'] = first
     behs = pd.read_table('/data/project/impulsivity/prediction_simulations/code/opts/HCP_YA_behs2predict.txt', header=None)
+
 
 # which files
 f_designator = pipe+opts+beh_file
