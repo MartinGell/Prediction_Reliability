@@ -1,9 +1,9 @@
 # Run specific variables
-#interview_age nih_tlbx_agecsc_dominant nih_crycogcomp_ageadjusted
-dat = Schaefer400x17_WM+CSF+GS_hcpya_316.jay
-beh_f = HCP_YA_beh_confs_unrelated.csv
-pipe = svr_heuristic_zscore_confound_removal_wcategorical
-#ridgeCV_zscore_confound_removal_wcategorical
+#Schaefer400x17_WM+CSF+GS_hcpya_771.jay Schaefer400x17_WM+CSF+GS_hcpya_316.jay
+dat = Schaefer400x17_WM+CSF+GS_hcpya_771.jay
+beh_f = HCP_YA_beh_all.csv
+pipe = ridgeCV_zscore_stratified_KFold_confound_removal_wcategorical
+#ridgeCV_zscore_confound_removal_wcategorical svr_heuristic_zscore_confound_removal_wcategorical
 
 
 # The environment

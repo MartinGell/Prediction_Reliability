@@ -1,6 +1,6 @@
 # Run specific variables
-dat = Schaefer400x17_nodenoise_UKB_5000.jay
-beh_f = UKB_5000_subs_FC_behav.csv
+dat = Schaefer400x17_nodenoise_UKB_new_5000.jay
+beh_f = UKB_5000_subs_FC_behav_HGS_Age_TMT.csv
 beh = Age_when_attended_assessment_centre-2.0
 pipe = ridgeCV_zscore
 
@@ -11,7 +11,7 @@ getenv      = True
 
 # Resources
 request_cpus   = 1
-request_memory = 5G
+request_memory = 15G
 request_disk   = 1G
 
 # Execution

@@ -1,8 +1,7 @@
 # Run specific variables
-#interview_age nih_tlbx_agecsc_dominant nih_crycogcomp_ageadjusted
-#dat = seitzman_nodes_average_runs_REST1_REST1_REST2_REST2-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt0.1_0.01.csv
+#interview_age nih_tlbx_agecsc_dominant nih_crycogcomp_ageadjusted nih_totalcogcomp_ageadjusted
 dat = Schaefer400x17_WM+CSF+GS_hcpaging_695.jay
-beh = nih_crycogcomp_ageadjusted
+beh = nih_totalcogcomp_ageadjusted
 pipe = ridgeCV_zscore
 
 
@@ -12,7 +11,7 @@ getenv      = True
 
 # Resources
 request_cpus   = 1
-request_memory = 2G
+request_memory = 3G
 request_disk   = 1G
 
 # Execution
@@ -20,11 +19,11 @@ initialdir = /data/project/impulsivity/prediction_simulations/code
 executable = $(initialdir)/run_in_venv.sh
 transfer_executable = False
 
-arguments = HCP_env python prediction_nestedCV.py $(dat) rel/$(beh_f_i) $(beh) $(pipe)
+arguments = old_HCP_env python3.9 prediction_nestedCV.py $(dat) rel/$(beh_f_i) $(beh) $(pipe)
 
 # Job
 log         = $(initialdir)/logs/simulations/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).log
 output      = $(initialdir)/logs/simulations/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).out
 error       = $(initialdir)/logs/simulations/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).err
 
-queue beh_f_i from opts/crycog_noise_test.txt
+queue beh_f_i from opts/total_cog_noise.txt
