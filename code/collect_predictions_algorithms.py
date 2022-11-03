@@ -18,24 +18,30 @@ all_res = []
 # kridge time = 91.2,66,66
 # ridge = 4,3.3,3.3
 
-patterns = ['svr_L2', 'svr_heuristic_zscore', 'kridge_averaged']#, 'ridge...']
-timing   = [[9,5,5],[23.1,17.5,17.5],[91.2,66,66]]#,[4,3.3,3.3]]
+patterns = ['svr_L2', 'svr_heuristic_zscore', 'kridge_averaged', 'ridgeCV_zscore_averaged-source_Schaefer400x17']
+#timing   = [[9,5,5],[23.1,17.5,17.5],[91.2,66,66],[4,3.3,3.3]]
 i = 0
 
 for pattern in patterns:
-
+    print(pattern)
     files = glob(f"{in_path}/pipe_{pattern}*")
     alg_res = []
 
     for file in files:
-        res = pd.read_csv(file)
-        name = file.split('/')
-        res['alg'] = pattern
-        res['beh'] = name[-1].split('-')[2]
-        alg_res.append(res)
+        if 'wnoise' in file:
+            continue
+        elif 'HCP_A' in file or 'interview_age_interview_age' in file:
+            print(file)
+            res = pd.read_csv(file)
+            name = file.split('/')
+            res['alg'] = pattern
+            res['beh'] = name[-1].split('-')[2]
+            alg_res.append(res)
+        else:
+            continue
 
     alg_res = pd.concat(alg_res, axis=0)
-    alg_res = pd.concat([alg_res.reset_index(),pd.DataFrame(timing[i], columns=['compute_time'])], axis=1)
+    #alg_res = pd.concat([alg_res.reset_index(),pd.DataFrame(timing[i], columns=['compute_time'])], axis=1)
     all_res.append(alg_res)
     i=i+1
 
