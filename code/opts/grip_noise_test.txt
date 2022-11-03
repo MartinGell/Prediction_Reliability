@@ -1,5 +1,3 @@
-nih_tlbx_agecsc_dominant_wnoise_rel_065_50.csv
-nih_tlbx_agecsc_dominant_wnoise_rel_065_5.csv
-nih_tlbx_agecsc_dominant_wnoise_rel_09_50.csv
-nih_tlbx_agecsc_dominant_wnoise_rel_09_5.csv
-nih_tlbx_agecsc_dominant.csv
+HCP_A_motor.csv
+HCP_A_motor_wnoise_rel_055_50.csv
+HCP_A_motor_wnoise_rel_085_50.csv
