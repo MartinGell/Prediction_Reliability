@@ -22,8 +22,8 @@ transfer_executable = False
 arguments = old_HCP_env python3.9 prediction_nestedCV.py $(dat) rel/$(beh_f_i) $(beh) $(pipe)
 
 # Job
-log         = $(initialdir)/logs/simulations/replication/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).log
-output      = $(initialdir)/logs/simulations/replication/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).out
-error       = $(initialdir)/logs/simulations/replication/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).err
+log         = $(initialdir)/logs/simulations/replication_SVR/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).log
+output      = $(initialdir)/logs/simulations/replication_SVR/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).out
+error       = $(initialdir)/logs/simulations/replication_SVR/$(beh_f_i)_$(beh)_$(pipe)_$(Cluster).$(Process).err
 
 queue beh_f_i from opts/age_noise.txt
