@@ -48,6 +48,14 @@ elif beh == 'age_ridgeCV_z_new':
     res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}interview_age_interview_age-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
     reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
+elif beh == 'age_SVR_heuristic_z_new':
+    beh_file = 'interview_age_wnoise'
+    pipe = 'svr_heuristic_zscore'
+    # First load empirical results, then append all simulation res to it
+    # ridgeCV_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695-beh_interview_age_interview_age-rseed_123456-cv_res.csv
+    res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}interview_age_interview_age-rseed_123456-cv_res.csv')
+    res['reliability'] = 1.0
+    reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
 elif beh == 'grip_ridge':
     beh_file = 'nih_tlbx_agecsc_dominant_wnoise'
     pipe = 'ridge'
