@@ -12,7 +12,7 @@
 /text_files/rel/*
 *submit*
 run_in_venv.sh
-
+save_FC_as_jay.py
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
