@@ -21,28 +21,41 @@ beh_file = sys.argv[2]
 beh = sys.argv[3]
 pipe = sys.argv[4]
 
-k_inner = 5             # k folds for hyperparam search
-k_outer = 10            # k folds for CV
-n_outer = 5             # n repeats for CV
-rs = 123456             # random state: int for reproducibility or None
 
-predict = False          # predict or just subsample?
-subsample = True       # Subsample data and compute learning curves?
-
+# SET UP
+predict = True          # Predict? E.g. if only subsampling?
+subsample = False       # Subsample data and compute learning curves?
 remove_confounds = False # Remove confounds?
-confs_in_file = True   # False = confs in beh file, otherwise it loads them from empirical data
-confounds = ['Age', 'Sex'] #['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol'] # 'FS_Total_GM_Vol'
-categorical = ['Sex'] #['gender'] #['Sex']   # of which categorical?
-
 zscr = True             # zscore features
+
+# Split validation before CV?
 val_split = False       # Split data to train and held out validation?
 val_split_size = 0.1    # Size of validation held out sample
 
-#res_folder = 'test'    # save results separately to ...
-#designator = 'test'    # string designation of output file
+# CV
+k_inner = 5             # k folds for hyperparam search
+k_outer = 10            # k folds for CV
+n_outer = 5             # n repeats for CV
+rs = 123456             # Random state: int for reproducibility or None
 
+# NAMING OUTPUT
+#res_folder = 'test'    # save results separately to ...
+#designator = 'test'    # string designation of output file (begining)
+
+# CONFOUNDS
+confs_in_file = True   # False = confs in beh file, otherwise it loads them from empirical data
+# HCP
+confounds = ['Age', 'Sex'] #['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol']
+categorical = ['Sex'] # of which categorical?
+# UKB
+#confounds = ['Age_when_attended_assessment_centre-2.0', 'sex']
+#categorical = ['sex'] # of which categorical?
+
+# SAMPLING
 if subsample:
-    subsample_Ns = np.geomspace(200,580,4).astype('int') # this needs to exclude test set of 10%
+    # subsample_Ns doesnt include test set. So if 10%, max can be full N - 10%
+    #subsample_Ns = np.geomspace(200,580,4).astype('int') # HCP sampling
+    subsample_Ns = np.geomspace(250,4450,7).astype('int') # UKB sampling, 50 less participants in case some are removed along the way 
     n_sample = 100      # number of samples to draw from data
     k_sample = 0.1      # fraction of data to use as test set
     res_folder = 'subsamples'
@@ -92,8 +105,6 @@ print(f'FC data shape: {FCs_all.shape}')
 
 # Filter FC subs based on behaviour subs
 tab, FCs = sort_files(tab_all, FCs_all)
-# transform scores to SD_scores -> not sure if this is the right place for it
-#tab, beh = transform2SD(tab, beh, 'outlier')
 
 # set up X and y for prediction
 target = tab.loc[:, [beh]]
@@ -126,8 +137,6 @@ else:
     print('\nNot removing confounds!')
     nested, model, grid = model_choice(pipe)
     print(f'Running prediction with {model}')
-
-#FCs[tab_all.isna().any(axis=1)]
 
 #%%
 # remove hold out data
@@ -183,11 +192,11 @@ if predict:
             return_train_score=True, return_estimator=True, verbose=3, n_jobs=1)
         # results
         cv_res = pd.DataFrame(scores)
-        if pipe == 'ridgeCV':                                                   # put to utils?
+        if pipe == 'ridgeCV': # put to utils?
             for i in scores['estimator']: print(i.alpha_)
         elif pipe.__contains__('confound'):
             for i in scores['estimator']: print(i[2].alpha_)
-        else:                                          # put to utils?
+        else:
             for i in scores['estimator']: print(i[1].alpha_)
          
 
@@ -299,3 +308,5 @@ if subsample:
     #cv_res = pd.DataFrame(scores)
     #print(f'Best hyperparams from nested CV {n_outer}x{k_outer}x{k_inner}:')
     #for i in cv_res.loc[:,'estimator']: print(i.best_estimator_)
+
+    print('\nFINISHED WITH LEARNING CURVES\n')
