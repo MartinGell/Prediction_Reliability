@@ -65,7 +65,7 @@ def sort_files(tab, FCs):
 
 
 def transform2SD(tab, beh, type):
-    # call as tab, beh = transform2SD(tab, beh) # this way beh gets replaced by label
+    # e.g. call as tab, beh = transform2SD(tab, beh, 'outlier') # this way beh gets replaced by label
     if beh == 'nih_tlbx_agecsc_dominant':
         print('Splitting based on NIH norms: mean 100, sd 15')
 
