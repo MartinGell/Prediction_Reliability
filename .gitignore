@@ -10,6 +10,8 @@
 /code/dev/*
 /text_files/OLD/*
 /text_files/rel/*
+*submit*
+run_in_venv.sh
 
 
 ### JupyterNotebooks ###
