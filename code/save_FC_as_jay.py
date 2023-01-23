@@ -10,12 +10,12 @@ import datatable as dt
 
 # paths
 #path2FCs = '/tmp/tmp_amir/for_Martin/random_FC_matrices' # currently the random FCs
-path2FCs = '/data/project/ukb_reliability_in_prediction/prediction_UKB/text_files/aomidvarnia' # currently the random FCs
+path2FCs = '/data/project/ukb_reliability_in_prediction/aomidvarnia/complexity_Schaefer400_17Networks_FC_matrices' # currently the random FCs
 path2sub_list = '/data/project/ukb_reliability_in_prediction/prediction_UKB/text_files' # where is the csv with list of 5k subs
 outpath = '/data/project/ukb_reliability_in_prediction/prediction_UKB/input' # where to save .jay file
 
 # Load beh_file
-beh = pd.read_csv(f'{path2sub_list}/UKB_5000_subs_FC_behav.csv')
+beh = pd.read_csv(f'{path2sub_list}/UKB_5000_subs_FC_behav_HGS_Age_TMT.csv')
 #x = np.linspace(0,99,100)
 #x = np.delete(x,41)
 #beh = pd.DataFrame(x, columns=['eid'])
