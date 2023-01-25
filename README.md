@@ -41,7 +41,7 @@ References: https://medium.com/swlh/setting-up-a-conda-environment-in-less-than-
 <br />
 
 ## 2. Input connectivity file
-One FC file, shaped subject*connection(i.e. features) placed in the `/input` folder. Features come from the upper (or lower) triangle of an FC matrix. There is an example file in the folder called 'Schaefer400x17_WM+CSF+GS_hcpaging_695.jay' which has 1 subjects and 78k (random) features.
+One FC file, shaped subject*connection(i.e. features) placed in the `/input` folder. Features come from the upper (or lower) triangle of an FC matrix. There is an example file in the folder called 'Example_Schaefer400x17_hcpaging_2' which has 2 subjects and 78k (random) features.
 
 For the file format I use .jay file format as it is faster to read but. Csv also works, but few lines need to be changed (see below for details). To compile a .jay file you can use:
 

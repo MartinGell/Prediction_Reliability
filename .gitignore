@@ -10,6 +10,8 @@
 /code/dev/*
 /text_files/OLD/*
 /text_files/rel/*
+!/text_files/HCP_A_age_example.csv
+/opts/
 *submit*
 run_in_venv.sh
 save_FC_as_jay.py
