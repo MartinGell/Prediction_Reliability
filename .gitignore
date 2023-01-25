@@ -8,8 +8,6 @@
 /figures
 /code_figures
 /code/dev/*
-/text_files/*
-!/text_files/HCP_A_age_example.csv
 /opts/
 *submit*
 run_in_venv.sh
