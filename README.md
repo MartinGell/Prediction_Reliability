@@ -20,6 +20,8 @@ $ python3 prediction_nestedCV.py Example_Schaefer400x17_hcpaging_2.jay HCP_A_age
 
 Other parameters (e.g. cross-validation, confound removal) have to be changed with the script itself.
 
+<br />
+
 ### For replication of results
 - Predictions using ridge regression were ran with `pipe = ridgeCV_zscore` and with `pipe = ridgeCV_zscore_confound_removal_wcategorical` for analyses with confound regression
 - Predictions using SVR with heuristic for C parameter were ran with `pipe = svr_heuristic_zscore` and with `pipe = svr_heuristic_zscore_confound_removal_wcategorical` for analyses with confound regression
