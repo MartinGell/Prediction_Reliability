@@ -1,21 +1,29 @@
 # Prediction of simulated data
 
-This repository has been created for prediction of behavioural and simualted behavioural data. Predictions have been optimised for faster computation times.
+This repository holds the scripts for prediction of behavioural and simualted behavioural data for the Burden of Reliability project (doi:...). Below is the necessary information to calculate predictions. While some pipelines have been tested to work out of the box, please note that this is not supposed to be a toolbox and is thus not polished to be one or maintained as one. That said, I am more than happy to answer any questions regarding the code and running it @ martygell@gmail.com
+
+<br />
 
 The main prediction script `prediction_nestedCV.py` is written to be used on a computational cluster. Hence it run in the commandline and requires 4 arguments (if using submit files, these need to be defined in the respective submit file):
 
 1. Functional connectivity file = `FC_file`
 2. File with behavioural data = `beh_file`
 3. Behaviour to predict = `beh`
-4. Pipeline/algorithm (see defined pipelines in code/func/models) = `pipe`
+4. Pipeline/algorithm (see defined pipelines in `code/func/models`) = `pipe`
+
+<br />
 
 Example files to run prediction script can be found in the directory. Example functional connectivity file in `/input/` (see below for more info on FC file) and example behavioural data file in `/text_files/`. Example to run in commandline:
 ```
-$ python3 prediction_nestedCV.py Example_Schaefer400x17_hcpaging_2.jay text_files/HCP_A_age_example.csv interview_age ridgeCV_zscore
+$ python3 prediction_nestedCV.py Example_Schaefer400x17_hcpaging_2.jay HCP_A_age_example.csv interview_age ridgeCV_zscore
 ```
 
 Other parameters (e.g. cross-validation, confound removal) have to be changed with the script itself.
 
+### For replication of results
+- Predictions using ridge regression were ran with `pipe = ridgeCV_zscore` and with `pipe = ridgeCV_zscore_confound_removal_wcategorical` for analyses with confound regression
+- Predictions using SVR with heuristic for C parameter were ran with `pipe = svr_heuristic_zscore` and with `pipe = svr_heuristic_zscore_confound_removal_wcategorical` for analyses with confound regression
+- For pipelines with featurewise confound regression note that inside `prediction_nestedCV.py` `remove_confounds` has to be set to `True` and desired confounds to regress selected after line 45.
 
 <br />
 

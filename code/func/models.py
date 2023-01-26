@@ -82,11 +82,6 @@ def model_choice(pipe, X = None, confound = None, cat_columns = None):
         nested = 0 # using nested cv
         model = make_pipeline(StandardScaler(),LinearSVRHeuristicC(loss='squared_epsilon_insensitive'))
         grid = []
-    # elif pipe == 'svr_L1_scaled':
-    #     nested = 1 # using nested cv
-    #     model = make_pipeline(StandardScaler(),LinearSVR(loss='epsilon_insensitive'))
-    #     C = [0.001, 0.01, 0.1, 1] # for age: [0.01, 0.1, 0.5, 1]
-    #     grid = dict(regressor__C=C)
     elif pipe == 'svr_y_q':
         nested = 1 # using nested cv
         model = SVR()
@@ -151,7 +146,7 @@ def model_choice(pipe, X = None, confound = None, cat_columns = None):
             RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
             )
         grid = []
-    elif pipe == 'BAD':
+    elif pipe == 'BAD': # Example how not to set up confound regression with categorical variables
         nested = 99 # using nested cv
         alphas = [1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
         categorical_columns = cat_columns#['Gender']
@@ -188,12 +183,12 @@ def model_choice(pipe, X = None, confound = None, cat_columns = None):
         kernel = ["linear"]
         alphas = [1e-3, 1e-2, 0.1, 1, 10, 100, 1e3]
         grid = dict(kernel=kernel, alpha=alphas)
-    # elif pipe == 'kridge_zscore': NO POSSIBLE
-    #     nested = 1 # using nested cv
-    #     model = make_pipeline(StandardScaler(),KernelRidge())
-    #     kernel = ["linear"]
-    #     alphas = [1e-3, 1e-2, 0.1, 1, 10, 100, 1e3]
-    #     grid = dict(kernelridge__kernel=kernel, kernelridge__alpha=alphas)
+    elif pipe == 'kridge_zscore': #note this combinations can produce odd results
+        nested = 1 # using nested cv
+        model = make_pipeline(StandardScaler(),KernelRidge())
+        kernel = ["linear"]
+        alphas = [1e-3, 1e-2, 0.1, 1, 10, 100, 1e3]
+        grid = dict(kernelridge__kernel=kernel, kernelridge__alpha=alphas)
     elif pipe == 'enet':
         nested = 1 # using nested cv
         model = ElasticNet(max_iter=1e4)

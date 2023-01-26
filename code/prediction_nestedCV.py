@@ -43,7 +43,7 @@ rs = 123456             # Random state: int for reproducibility or None
 #designator = 'test'    # string designation of output file (begining)
 
 # CONFOUNDS
-confs_in_file = True   # False = confs in beh file, otherwise it loads them from empirical data
+confs_in_file = True   # False = confs in beh file, otherwise it loads them from empirical data (see /func/utils.py)
 # HCP
 confounds = ['Age', 'Sex'] #['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol']
 categorical = ['Sex'] # of which categorical?
