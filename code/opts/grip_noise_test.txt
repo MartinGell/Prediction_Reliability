@@ -1,3 +1,0 @@
-HCP_A_motor.csv
-HCP_A_motor_wnoise_rel_055_50.csv
-HCP_A_motor_wnoise_rel_085_50.csv

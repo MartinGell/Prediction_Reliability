@@ -1,3 +1,0 @@
-interview_age.csv
-HCP_A_cryst.csv
-HCP_A_motor.csv

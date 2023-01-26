@@ -1,3 +1,0 @@
-interview_age_wnoise_rel_09_50.csv
-interview_age_wnoise_rel_09_5.csv
-interview_age.csv

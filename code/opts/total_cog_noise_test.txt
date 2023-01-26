@@ -1,2 +1,0 @@
-HCP_A_total.csv
-HCP_A_total_wnoise_rel_095_50.csv
