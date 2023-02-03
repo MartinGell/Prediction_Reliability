@@ -25,7 +25,7 @@ pipe = sys.argv[4]
 # SET UP
 predict = True          # Predict? E.g. if only subsampling?
 subsample = False       # Subsample data and compute learning curves?
-remove_confounds = False # Remove confounds?
+remove_confounds = True # Remove confounds?
 zscr = True             # zscore features
 
 # Split validation before CV?
@@ -43,10 +43,10 @@ rs = 123456             # Random state: int for reproducibility or None
 #designator = 'test'    # string designation of output file (begining)
 
 # CONFOUNDS
-confs_in_file = True   # False = confs in beh file, otherwise it loads them from empirical data (see /func/utils.py)
+load_confs = True   # False = confs in beh_file, otherwise it loads them from empirical data (see /func/utils.py)
 # HCP
-confounds = ['Age', 'Sex'] #['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol']
-categorical = ['Sex'] # of which categorical?
+confounds = ['interview_age', 'gender'] #['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol']
+categorical = ['gender'] # of which categorical?
 # UKB
 #confounds = ['Age_when_attended_assessment_centre-2.0', 'sex']
 #categorical = ['sex'] # of which categorical?
@@ -84,8 +84,8 @@ print(f'Behaviour data shape: {tab_all.shape}')
 
 # attach confounds to tab_all if not there already before filtering
 if remove_confounds:
-    if confs_in_file:
-        tab_all = prep_confs(tab_all, confounds, wd, FC_file)
+    if load_confs:
+        tab_all = prep_confs(tab_all, confounds, wd, beh_file)
 
 # remove outliers
 tab_all = filter_outliers(tab_all,beh)

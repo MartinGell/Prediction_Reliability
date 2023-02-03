@@ -153,19 +153,27 @@ def test_cor_true_pred(y_true, y_pred):
     return cor
 
 
-def prep_confs(tab_all, confounds, wd, FC_file):
-    if FC_file == 'Schaefer400x17_WM+CSF+GS_hcpaging_695.csv':
+def prep_confs(tab_all, confounds, wd, beh_file):
+    if 'HCP_A_total' in beh_file:
+        empirical_file = 'HCP_A_total.csv'
+        path2file = wd / 'text_files' / 'rel' / empirical_file
+        empirical_data = pd.read_csv(path2file)
+    if 'HCP_A_cryst' in beh_file:
         empirical_file = 'HCP_A_cryst.csv'
         path2file = wd / 'text_files' / 'rel' / empirical_file
         empirical_data = pd.read_csv(path2file)
+    if 'HCP_A_motor' in beh_file:
+        empirical_file = 'HCP_A_motor.csv'
+        path2file = wd / 'text_files' / 'rel' / empirical_file
+        empirical_data = pd.read_csv(path2file)
 
-        print(f'Getting confs from: {empirical_file}')
-        for conf_i in confounds:
-            print(f'Adding {conf_i}')
-            conf2add = empirical_data[f'{conf_i}']
-            conf2add.reset_index(inplace=True, drop=True)
-            #FCs = FCs.append(tab[f'{conf_i}'], ignore_index=True)
-            tab_all[f'{conf_i}'] = conf2add
+    print(f'Getting confs from: {empirical_file}')
+    for conf_i in confounds:
+        print(f'Adding {conf_i}')
+        conf2add = empirical_data[f'{conf_i}']
+        conf2add.reset_index(inplace=True, drop=True)
+        #FCs = FCs.append(tab[f'{conf_i}'], ignore_index=True)
+        tab_all[f'{conf_i}'] = conf2add
     
     return tab_all
 

@@ -1,4 +1,4 @@
-# Prediction of simulated data
+# Brain-behaviour Predictions
 
 This repository holds the scripts for prediction of behavioural and simualted behavioural data for the Burden of Reliability project (doi:...). Below is the necessary information to calculate predictions. While some pipelines have been tested to work out of the box, please note that this is not supposed to be a toolbox and is thus not polished to be one or maintained as one. That said, I am more than happy to answer any questions regarding the code and running it @ martygell@gmail.com
 
