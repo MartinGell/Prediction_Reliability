@@ -25,7 +25,7 @@ pipe = sys.argv[4]
 # SET UP
 predict = True          # Predict? E.g. if only subsampling?
 subsample = False       # Subsample data and compute learning curves?
-remove_confounds = True # Remove confounds?
+remove_confounds = False # Remove confounds?
 zscr = True             # zscore features
 
 # Split validation before CV?
@@ -43,13 +43,20 @@ rs = 123456             # Random state: int for reproducibility or None
 #designator = 'test'    # string designation of output file (begining)
 
 # CONFOUNDS
-load_confs = True   # False = confs in beh_file, otherwise it loads them from empirical data (see /func/utils.py)
-# HCP
-confounds = ['interview_age', 'gender'] #['interview_age', 'gender'] #['Age', 'Sex', 'FS_IntraCranial_Vol']
-categorical = ['gender'] # of which categorical?
+load_confs = False   # False = confs in beh_file, otherwise it loads them from empirical data (see /func/utils.py)
+# HCP A
+#confounds = ['interview_age', 'gender']
+#categorical = ['gender'] # of which categorical?
+# HCP YA
+#confounds = ['Age', 'Sex'] #['Age', 'Sex', 'FS_IntraCranial_Vol']
+#categorical = ['Sex'] # of which categorical?
 # UKB
 #confounds = ['Age_when_attended_assessment_centre-2.0', 'sex']
 #categorical = ['sex'] # of which categorical?
+# ABCD
+confounds = ['interview_age', 'gender']
+categorical = ['gender'] # of which categorical?
+
 
 # SAMPLING
 if subsample:
@@ -93,14 +100,26 @@ print(f'Behaviour data shape: {tab_all.shape}') # just to check
 
 # load data and define leave out set
 # table of subs (rows) by regions (columns)
-path2FC = wd / 'input' / FC_file
-#path2FC = Path(os.path.dirname(wd))
-#path2FC = path2FC / 'Preprocess_HCP' / 'res' / FC_file
-#FCs_all = pd.read_csv(path2FC)
-FCs_all = dt.fread(path2FC)
-#FCs_all.materialize(to_memory=True)
-FCs_all = FCs_all.to_pandas()
-print(f'\nUsing {FC_file}')
+if FC_file == 'HCP2016FreeSurferSubcortical_abcd_baselineYear1Arm1_rest_3517.jay':
+    print(f'\nUsing combined {FC_file} and HCP2016FreeSurferSubcortical_abcd_baselineYear1Arm1_rest_3435.jay')
+    #
+    path2FC_1 = wd / 'input' / FC_file
+    path2FC_2 = wd / 'input' / 'HCP2016FreeSurferSubcortical_abcd_baselineYear1Arm1_rest_3435.jay'
+    FCs_all_1 = dt.fread(path2FC_1)
+    FCs_all_1 = FCs_all_1.to_pandas()
+    FCs_all_2 = dt.fread(path2FC_2)
+    FCs_all_2 = FCs_all_2.to_pandas()
+    FCs_all = pd.concat([FCs_all_1, FCs_all_2], axis=0, ignore_index=True)
+else:
+    print(f'\nUsing {FC_file}')
+    path2FC = wd / 'input' / FC_file
+    #path2FC = Path(os.path.dirname(wd))
+    #path2FC = path2FC / 'Preprocess_HCP' / 'res' / FC_file
+    #FCs_all = pd.read_csv(path2FC)
+    FCs_all = dt.fread(path2FC)
+    #FCs_all.materialize(to_memory=True)
+    FCs_all = FCs_all.to_pandas()
+
 print(f'FC data shape: {FCs_all.shape}')
 
 # Filter FC subs based on behaviour subs
