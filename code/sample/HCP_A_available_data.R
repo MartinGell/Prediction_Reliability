@@ -25,9 +25,8 @@ subs = d %>% select(src_subject_id)
 
 ####
 # need to make sure we are doing simulations based on only subs we have data for
-# as using leo's subs need to filter these out first
-subs_leo <- tibble(read_csv('/home/mgell/Work/Prediction_HCP/text_files/subs_leo.csv'))
-d_leo = filter(d, src_subject_id %in% c(subs_leo$src_subject_id))
+subswimaging <- tibble(read_csv('/home/mgell/Work/Prediction_HCP/text_files/subs_leo.csv'))
+d_leo = filter(d, src_subject_id %in% c(subswimaging$src_subject_id))
 subs = d_leo %>% select(src_subject_id)
 
 
@@ -121,11 +120,11 @@ write_csv(subs, '/home/mgell/Work/FC/text_files/subs.csv')
 
 
 
-# extra
-df = read_delim('/home/mgell/Work/t.txt', delim = '.', col_names = FALSE)
-#s = read_delim('/home/mgell/Work/Preprocess_HCP/code/subs/subs_HCP_A.txt', delim = '\t', col_names = FALSE)
-#s = read_delim('/home/mgell/Work/Preprocess_HCP/code/subs/subs_HCP_A_CARIT.txt', delim = '\t', col_names = FALSE)
-s = read_delim('/home/mgell/Work/Preprocess_HCP/code/subs/subs_HCP_A_missing.txt', delim = '\t', col_names = FALSE)
-missing = df$X2 + 1 # adjust for 0 base indexing on juseless
-missinsubs = s[c(missing),1]
-write_delim(missinsubs, '/home/mgell/Work/Preprocess_HCP/code/subs/subs_HCP_A_missing.txt', delim = '.', col_names = FALSE)
+# # extra
+# df = read_delim('/home/mgell/Work/t.txt', delim = '.', col_names = FALSE)
+# #s = read_delim('/home/mgell/Work/Preprocess_HCP/code/subs/subs_HCP_A.txt', delim = '\t', col_names = FALSE)
+# #s = read_delim('/home/mgell/Work/Preprocess_HCP/code/subs/subs_HCP_A_CARIT.txt', delim = '\t', col_names = FALSE)
+# s = read_delim('/home/mgell/Work/Preprocess_HCP/code/subs/subs_HCP_A_missing.txt', delim = '\t', col_names = FALSE)
+# missing = df$X2 + 1 # adjust for 0 base indexing on juseless
+# missinsubs = s[c(missing),1]
+# write_delim(missinsubs, '/home/mgell/Work/Preprocess_HCP/code/subs/subs_HCP_A_missing.txt', delim = '.', col_names = FALSE)

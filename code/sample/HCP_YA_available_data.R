@@ -77,8 +77,8 @@ d_lowmo$Gambling_Task_Median_RT_Smaller_log <- log(d_lowmo$Gambling_Task_Median_
 write_csv(d_lowmo, '/home/mgell/Work/Prediction_HCP/text_files/HCP_YA_beh_all.csv')
 
 # demographics
-subs_leo = read_csv('/home/mgell/Work/reliability/text_files/HCP_YA_subs_leo.csv')
-sample <- filter(d_lowmo, Subject %in% c(subs_leo$subs))
+subswimaging = read_csv('/home/mgell/Work/reliability/text_files/HCP_YA_subs_leo.csv')
+sample <- filter(d_lowmo, Subject %in% c(subswimaging$subs))
 sample$Gender = as.factor(sample$Gender)
 mean(sample$Age)
 sd(sample$Age)

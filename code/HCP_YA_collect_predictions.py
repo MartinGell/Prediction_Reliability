@@ -12,7 +12,6 @@ import numpy as np
 pipe = sys.argv[1]
 
 #opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695_zscored-beh_'
-#opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpya_316_zscored-beh_'
 opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpya_771_zscored-beh_'
 
 # paths 
