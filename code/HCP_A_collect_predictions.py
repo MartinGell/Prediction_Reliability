@@ -13,7 +13,13 @@ beh = sys.argv[1]
 n = sys.argv[2]
 #opts = '_averaged-source_seitzman_nodes_average_runs_REST1_REST1_REST2_REST2-subs_651-params_FC_gm_FSL025_no_overlap_dt_flt01_001-beh_'
 #opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695-beh_'
-opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695_zscored-beh_'
+#opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_hcpaging_695_zscored-beh_'
+#opts = '_averaged-source_Schaefer300x17_WM+CSF+GS_hcpaging_695_zscored-beh_'
+#opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_rest1_hcpaging_695_zscored-beh_'
+#opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_r2z2r_rest2_hcpaging_695_zscored-beh_'
+#opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_r2z2r_rest1_hcpaging_695_zscored-beh_'
+#opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_r2z2r_rest1_tp239_hcpaging_695_zscored-beh_'
+opts = '_averaged-source_Schaefer400x17_WM+CSF+GS_r2z2r_rest1AP_hcpaging_695_zscored-beh_'
 #opts = '_averaged-source_Seitzman_nodes300_WM+CSF+GS_hcpaging_650_zscored-beh_'
 
 # paths 
@@ -112,6 +118,13 @@ elif beh == 'total_ridgeCV_z_new_confound':
     res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}HCP_A_total_nih_totalcogcomp_ageadjusted-rseed_123456-cv_res.csv')
     res['reliability'] = 1.0
     reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
+elif beh == 'total_SVR_heuristic_z_new':
+    beh_file = 'HCP_A_total_wnoise'
+    pipe = 'svr_heuristic_zscore'
+    # First load empirical results, then append all simulation res to it
+    res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}HCP_A_total_nih_totalcogcomp_ageadjusted-rseed_123456-cv_res.csv')
+    res['reliability'] = 1.0
+    reliabilities = [0.99,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5]
 
 # which files
 f_designator = pipe+opts+beh_file
@@ -121,6 +134,9 @@ for rel_i in reliabilities:
     rel_i_str = str(rel_i)
     print(rel_i_str)
     files = glob(f"{in_path}/pipe_{f_designator}_rel_{rel_i_str.replace('.','')}_*")
+    print(files[1])
+    print(files[99])
+    print(len(files))
 
     for f_i in files:
         f = pd.read_csv(f_i)

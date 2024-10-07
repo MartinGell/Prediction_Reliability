@@ -31,6 +31,15 @@ if pipe == 'ridgeCV_z':
     res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}{beh_file}_lmt_scr_avg_rt-rseed_123456-cv_res.csv')
     res['beh'] = first
     behs = pd.read_table('/data/project/impulsivity/prediction_simulations/code/opts/ABCD_behs2predict.txt', header=None)
+elif pipe == 'ridgeCV_z_conf_removed':
+    beh_file = 'ABCD_beh_all'
+    pipe = 'ridgeCV_zscore_confound_removal_wcategorical'
+    first = 'lmt_scr_avg_rt'
+    # First load empirical results, then append all simulation res to it
+    #pipe_ridgeCV_zscore_confound_removal_wcategorical_averaged-source_HCP2016FreeSurferSubcortical_abcd_baselineYear1Arm1_rest_3517_zscored-beh_ABCD_beh_all_tfmri_rec_all_beh_neutf_dp-rseed_123456-cv_res.csv
+    res = pd.read_csv(f'{in_path}/pipe_{pipe}{opts}{beh_file}_lmt_scr_avg_rt-rseed_123456-cv_res.csv')
+    res['beh'] = first
+    behs = pd.read_table('/data/project/impulsivity/prediction_simulations/code/opts/ABCD_behs2predict.txt', header=None)
 
 
 # which files

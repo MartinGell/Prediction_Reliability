@@ -44,7 +44,7 @@ For this script to work a number of python modules are required. The easiest way
 
 ### Miniconda
 In 'reqs' folder use the env_setup.yml to create the environemnt which will be called 'HCP_env':  
-`conda env create -f (cloned_dir)/Preprocess_HCP/reqs/env_setup.yml`
+`conda env create -f (cloned_dir)/reqs/env_setup.yml`
 
 Check env was installed correctly:  
 `conda info --envs`

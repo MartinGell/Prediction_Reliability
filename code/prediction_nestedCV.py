@@ -12,7 +12,7 @@ from scipy.stats import zscore
 
 from func.utils import filter_outliers, sort_files, transform2SD, cor_true_pred_pearson, cor_true_pred_spearman, prep_confs
 from func.models import model_choice
-from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV, GroupShuffleSplit
+from sklearn.model_selection import ShuffleSplit, cross_validate, learning_curve, train_test_split, RepeatedKFold, KFold, GridSearchCV, GroupShuffleSplit, permutation_test_score
 
 
 ### Set params ###
@@ -54,8 +54,8 @@ load_confs = False   # False = confs in beh_file, otherwise it loads them from e
 #confounds = ['Age_when_attended_assessment_centre-2.0', 'sex']
 #categorical = ['sex'] # of which categorical?
 # ABCD
-confounds = ['interview_age', 'gender']
-categorical = ['gender'] # of which categorical?
+#confounds = ['interview_age', 'gender']
+#categorical = ['gender'] # of which categorical?
 
 
 # SAMPLING
@@ -217,6 +217,9 @@ if predict:
             for i in scores['estimator']: print(i[2].alpha_)
         else:
             for i in scores['estimator']: print(i[1].alpha_)
+    elif nested == 8: # permutation
+        score_empirical, perm_scores, pval = permutation_test_score(model, X, np.ravel(y), scoring="r2", cv=outer_cv, n_permutations=100)
+        print(f"Score on original data: {score_empirical:.2f} (p-value: {pval:.3f})")
          
 
 

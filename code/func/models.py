@@ -30,7 +30,7 @@ def model_choice(pipe, X = None, confound = None, cat_columns = None):
         model = SVR()
         kernel = ["linear"]
         #tolerance = [1e-3]
-        C = [0.001, 0.01, 0.1] # for age: [0.01, 0.1, 0.5, 1]
+        C = [0.001, 0.01, 0.1, 1] # for age: [0.01, 0.1, 0.5, 1]
         grid = dict(kernel=kernel, C=C)
     elif pipe == 'svr_heuristic':
         nested = 0 # using nested cv
@@ -146,20 +146,6 @@ def model_choice(pipe, X = None, confound = None, cat_columns = None):
             RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
             )
         grid = []
-    elif pipe == 'BAD': # Example how not to set up confound regression with categorical variables
-        nested = 99 # using nested cv
-        alphas = [1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
-        categorical_columns = cat_columns#['Gender']
-        preprocessor = ColumnTransformer(
-            transformers=[
-                ("cat", "passthrough", categorical_columns)],
-                remainder=StandardScaler())
-        model = make_pipeline(
-            preprocessor, 
-            ConfoundRemover(n_confounds=len(confound)), 
-            RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
-            )
-        grid = []
     elif pipe == 'ridgeCV_zscore_stratified_KFold_confound_removal_wcategorical':
         nested = 99 # using nested cv
         alphas = [1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
@@ -175,6 +161,26 @@ def model_choice(pipe, X = None, confound = None, cat_columns = None):
             preprocessor,
             ConfoundRemover(n_confounds=len(confound)),
             RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
+            )
+        grid = []
+    elif pipe == 'BAD': # Example how not to set up confound regression with categorical variables
+        nested = 99 # using nested cv
+        alphas = [1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4, 1e5] #[1, 10, 100, 500, 1e3, 1e4] #[1e-4, 1e-3, 1e-2, 0.1, 1, 10, 100, 1e3, 1e4]        
+        categorical_columns = cat_columns#['Gender']
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("cat", "passthrough", categorical_columns)],
+                remainder=StandardScaler())
+        model = make_pipeline(
+            preprocessor, 
+            ConfoundRemover(n_confounds=len(confound)), 
+            RidgeCV(alphas=alphas, store_cv_values=True, scoring="neg_root_mean_squared_error")
+            )
+        grid = []
+    elif pipe == 'ridge_zscore_100000':
+        nested = 8 # using nested cv
+        model = make_pipeline(
+            StandardScaler(),Ridge(alpha=100000.0)
             )
         grid = []
     elif pipe == 'kridge':
