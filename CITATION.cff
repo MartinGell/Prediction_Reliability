@@ -1,0 +1,10 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-name: Gell
+  given-names: Martin
+orcid: https://orcid.org/0000-0002-3407-3393
+title: MartinGell/Prediction_Reliability:  Analysis code for: How Measurement Noise Limits Brain-Behaviour Predictions
+version: 1.01
+date-released: 2024-10-07
+                                
