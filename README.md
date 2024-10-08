@@ -4,7 +4,7 @@ This repository holds the scripts for prediction of behavioural and simualted be
 
 <br />
 
-The main prediction script `prediction_nestedCV.py` is written to be used on a computational cluster. Hence it runs in the command line and requires 4 arguments (if using submit files, these need to be defined in the respective submit file):
+The main prediction script `prediction_nestedCV.py` is written to be ran in parallel on a computational cluster. Hence it can run in the command line and requires 4 arguments (if using submit files, these need to be defined in the respective submit file):
 
 1. Functional connectivity file = `FC_file`
 2. File with behavioural data = `beh_file`

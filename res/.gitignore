@@ -4,14 +4,7 @@
 
 
 # my files
-/figures
-/code_figures
-/code/dev/*
-/code/opts/*
-/opts/
-*submit*
-run_in_venv.sh
-save_FC_as_jay.py
+
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks

@@ -19,10 +19,10 @@ format_cor <- function(test) {
 
 ### Figure 2A ###
 # HCP-YA
-plt_out = '/home/mgell/Work/reliability/plots/Figures/'
+plt_out = '/home/mgell/Work/Prediction_Reliability/plots/Figures/'
 
 # load data
-d = read_csv('/home/mgell/Work/reliability/res/HCP_YA_reliability_accuracy.csv')
+d = read_csv('/home/mgell/Work/Prediction_Reliability/res/HCP_YA_reliability_accuracy.csv')
 
 
 # test for correlation
